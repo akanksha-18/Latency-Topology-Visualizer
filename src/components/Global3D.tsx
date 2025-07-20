@@ -741,7 +741,9 @@ export default function Global3D({
         }
       })
 
-      rendererRef.current!.render(sceneRef.current!, cameraRef.current!)
+      if (rendererRef.current && sceneRef.current && cameraRef.current) {
+        rendererRef.current.render(sceneRef.current, cameraRef.current)
+      }
     }
 
     animate()
