@@ -1,31 +1,29 @@
-
 import { useRef, useEffect, useState } from 'react'
 import * as THREE from 'three'
+import type { ExchangeData, LatencyData, FilterState } from '../types'
 
-// Mock data for demonstration
-const mockExchangeData = [
-  { id: 1, name: 'NYSE', cloudProvider: 'aws', location: { lat: 40.7128, lng: -74.0060 } },
-  { id: 2, name: 'LSE', cloudProvider: 'azure', location: { lat: 51.5074, lng: -0.1278 } },
-  { id: 3, name: 'TSE', cloudProvider: 'gcp', location: { lat: 35.6762, lng: 139.6503 } },
-  { id: 4, name: 'SSE', cloudProvider: 'aws', location: { lat: 31.2304, lng: 121.4737 } },
-  { id: 5, name: 'BSE', cloudProvider: 'azure', location: { lat: 19.0760, lng: 72.8777 } },
-]
+interface Global3DProps {
+  exchangeData: ExchangeData[]
+  latencyData: LatencyData[]
+  filters: FilterState
+  selectedExchange: ExchangeData | null
+  onExchangeSelect: (exchange: ExchangeData | null) => void
+}
 
-const mockLatencyData = [
-  { sourceId: 1, targetId: 2, latency: 45 },
-  { sourceId: 2, targetId: 3, latency: 125 },
-  { sourceId: 3, targetId: 4, latency: 25 },
-  { sourceId: 1, targetId: 5, latency: 180 },
-]
-
-export default function Global3D() {
-  const containerRef = useRef(null)
-  const sceneRef = useRef()
-  const rendererRef = useRef()
-  const cameraRef = useRef()
-  const globeRef = useRef()
-  const atmosphereRef = useRef()
-  const starsRef = useRef()
+export default function Global3D({ 
+  exchangeData, 
+  latencyData, 
+  filters, 
+  selectedExchange, 
+  onExchangeSelect 
+}: Global3DProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
+  const sceneRef = useRef<THREE.Scene>()
+  const rendererRef = useRef<THREE.WebGLRenderer>()
+  const cameraRef = useRef<THREE.PerspectiveCamera>()
+  const globeRef = useRef<THREE.Group>()
+  const atmosphereRef = useRef<THREE.Mesh>()
+  const starsRef = useRef<THREE.Points>()
   const initRef = useRef(false)
   const clockRef = useRef(new THREE.Clock())
   const controlsRef = useRef({
@@ -40,7 +38,6 @@ export default function Global3D() {
   
   const [isInitialized, setIsInitialized] = useState(false)
   const [showLatency, setShowLatency] = useState(true)
-  const [selectedExchange, setSelectedExchange] = useState(null)
 
   // Initialize Three.js scene
   useEffect(() => {
@@ -120,7 +117,7 @@ export default function Global3D() {
     }
   }, [])
 
-  function createStarField(scene) {
+  function createStarField(scene: THREE.Scene) {
     const starsGeometry = new THREE.BufferGeometry()
     const starCount = 2000
     const positions = new Float32Array(starCount * 3)
@@ -166,14 +163,14 @@ export default function Global3D() {
     scene.add(stars)
   }
 
-  function createEarthLayers(globeGroup) {
+  function createEarthLayers(globeGroup: THREE.Group) {
     const radius = 5
 
     // Create gradient texture
     const canvas = document.createElement('canvas')
     canvas.width = 512
     canvas.height = 512
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d')!
     
     const gradient = ctx.createRadialGradient(256, 256, 0, 256, 256, 256)
     gradient.addColorStop(0, '#1e3a8a')
@@ -223,7 +220,7 @@ export default function Global3D() {
     createGridLines(globeGroup, radius)
   }
 
-  function createGridLines(globeGroup, radius) {
+  function createGridLines(globeGroup: THREE.Group, radius: number) {
     const gridGroup = new THREE.Group()
     
     // Latitude lines
@@ -276,7 +273,7 @@ export default function Global3D() {
     globeGroup.add(gridGroup)
   }
 
-  function createAtmosphere(globeGroup) {
+  function createAtmosphere(globeGroup: THREE.Group) {
     // Inner atmosphere
     const atmosphereGeometry = new THREE.SphereGeometry(5.3, 64, 64)
     const atmosphereMaterial = new THREE.MeshBasicMaterial({
@@ -304,7 +301,7 @@ export default function Global3D() {
     globeGroup.add(glow)
   }
 
-  function setupLighting(scene) {
+  function setupLighting(scene: THREE.Scene) {
     // Ambient light
     const ambientLight = new THREE.AmbientLight(0x404080, 0.4)
     scene.add(ambientLight)
@@ -328,7 +325,7 @@ export default function Global3D() {
     scene.add(pointLight1)
   }
 
-  // Add exchange markers
+  // Add exchange markers - now using props instead of mock data
   useEffect(() => {
     if (!sceneRef.current || !globeRef.current || !isInitialized) return
 
@@ -336,17 +333,24 @@ export default function Global3D() {
     const existingMarkers = globeRef.current.children.filter(child => 
       child.userData.type === 'exchange-marker'
     )
-    existingMarkers.forEach(marker => globeRef.current.remove(marker))
+    existingMarkers.forEach(marker => globeRef.current!.remove(marker))
+
+    // Filter exchanges based on filters
+    const filteredExchanges = exchangeData.filter(exchange => {
+      if (filters.exchanges.length > 0 && !filters.exchanges.includes(exchange.id)) return false
+      if (!filters.cloudProviders.includes(exchange.cloudProvider)) return false
+      return true
+    })
 
     // Add new markers
-    mockExchangeData.forEach(exchange => {
+    filteredExchanges.forEach(exchange => {
       const marker = createExchangeMarker(exchange)
       marker.userData = { type: 'exchange-marker', exchange }
-      globeRef.current.add(marker)
+      globeRef.current!.add(marker)
     })
-  }, [isInitialized])
+  }, [isInitialized, exchangeData, filters])
 
-  // Add latency connections
+  // Add latency connections - now using props instead of mock data
   useEffect(() => {
     if (!sceneRef.current || !globeRef.current || !showLatency || !isInitialized) return
 
@@ -354,22 +358,45 @@ export default function Global3D() {
     const existingConnections = globeRef.current.children.filter(child =>
       child.userData.type === 'latency-connection'
     )
-    existingConnections.forEach(connection => globeRef.current.remove(connection))
+    existingConnections.forEach(connection => globeRef.current!.remove(connection))
+
+    // Filter latency data based on filters
+    const filteredLatencyData = latencyData.filter(data => {
+      if (data.latency < filters.latencyRange[0] || data.latency > filters.latencyRange[1]) return false
+      
+      const sourceExchange = exchangeData.find(e => e.id === data.sourceId)
+      const targetExchange = exchangeData.find(e => e.id === data.targetId)
+      
+      if (!sourceExchange || !targetExchange) return false
+      
+      if (filters.exchanges.length > 0) {
+        if (!filters.exchanges.includes(sourceExchange.id) && !filters.exchanges.includes(targetExchange.id)) {
+          return false
+        }
+      }
+      
+      if (!filters.cloudProviders.includes(sourceExchange.cloudProvider) || 
+          !filters.cloudProviders.includes(targetExchange.cloudProvider)) {
+        return false
+      }
+      
+      return true
+    })
 
     // Add new connections
-    mockLatencyData.forEach(data => {
-      const sourceExchange = mockExchangeData.find(e => e.id === data.sourceId)
-      const targetExchange = mockExchangeData.find(e => e.id === data.targetId)
+    filteredLatencyData.forEach(data => {
+      const sourceExchange = exchangeData.find(e => e.id === data.sourceId)
+      const targetExchange = exchangeData.find(e => e.id === data.targetId)
       
       if (sourceExchange && targetExchange) {
         const connection = createLatencyConnection(sourceExchange, targetExchange, data)
         connection.userData = { type: 'latency-connection', data }
-        globeRef.current.add(connection)
+        globeRef.current!.add(connection)
       }
     })
-  }, [showLatency, isInitialized])
+  }, [showLatency, isInitialized, latencyData, exchangeData, filters])
 
-  function createExchangeMarker(exchange) {
+  function createExchangeMarker(exchange: ExchangeData) {
     const group = new THREE.Group()
     
     const phi = (90 - exchange.location.lat) * (Math.PI / 180)
@@ -386,7 +413,7 @@ export default function Global3D() {
     const coreMaterial = new THREE.MeshBasicMaterial({ 
       color,
       transparent: true,
-      opacity: 0.9
+      opacity: selectedExchange?.id === exchange.id ? 1.0 : 0.9
     })
     const core = new THREE.Mesh(coreGeometry, coreMaterial)
 
@@ -395,7 +422,7 @@ export default function Global3D() {
     const glowMaterial = new THREE.MeshBasicMaterial({
       color,
       transparent: true,
-      opacity: 0.3,
+      opacity: selectedExchange?.id === exchange.id ? 0.5 : 0.3,
       blending: THREE.AdditiveBlending
     })
     const glow = new THREE.Mesh(glowGeometry, glowMaterial)
@@ -438,7 +465,7 @@ export default function Global3D() {
     return group
   }
 
-  function createLatencyConnection(source, target, latencyData) {
+  function createLatencyConnection(source: ExchangeData, target: ExchangeData, latencyData: LatencyData) {
     const sourcePos = getPositionFromLatLng(source.location.lat, source.location.lng)
     const targetPos = getPositionFromLatLng(target.location.lat, target.location.lng)
 
@@ -464,7 +491,7 @@ export default function Global3D() {
     return new THREE.Line(geometry, material)
   }
 
-  function getPositionFromLatLng(lat, lng) {
+  function getPositionFromLatLng(lat: number, lng: number) {
     const phi = (90 - lat) * (Math.PI / 180)
     const theta = (lng + 180) * (Math.PI / 180)
     const radius = 5.4
@@ -476,7 +503,7 @@ export default function Global3D() {
     )
   }
 
-  function getCloudProviderColor(provider) {
+  function getCloudProviderColor(provider: string) {
     switch (provider) {
       case 'aws': return 0xff6b35
       case 'gcp': return 0x4fc3f7
@@ -485,11 +512,56 @@ export default function Global3D() {
     }
   }
 
-  function getLatencyColor(latency) {
+  function getLatencyColor(latency: number) {
     if (latency < 50) return 0x00ff88
     if (latency < 150) return 0xffd700
     return 0xff4757
   }
+
+  // Add click handler for exchange selection
+  useEffect(() => {
+    if (!containerRef.current || !isInitialized) return
+
+    const raycaster = new THREE.Raycaster()
+    const mouse = new THREE.Vector2()
+
+    const handleClick = (event: MouseEvent) => {
+      if (!cameraRef.current || !sceneRef.current || !globeRef.current) return
+
+      const rect = containerRef.current!.getBoundingClientRect()
+      mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+      mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
+
+      raycaster.setFromCamera(mouse, cameraRef.current)
+      
+      const markers = globeRef.current.children.filter(child => 
+        child.userData.type === 'exchange-marker'
+      )
+      
+      const intersects = raycaster.intersectObjects(markers, true)
+      
+      if (intersects.length > 0) {
+        let parent = intersects[0].object
+        while (parent && !parent.userData.exchange) {
+          parent = parent.parent!
+        }
+        
+        if (parent && parent.userData.exchange) {
+          onExchangeSelect(parent.userData.exchange)
+        }
+      } else {
+        onExchangeSelect(null)
+      }
+    }
+
+    containerRef.current.addEventListener('click', handleClick)
+
+    return () => {
+      if (containerRef.current) {
+        containerRef.current.removeEventListener('click', handleClick)
+      }
+    }
+  }, [isInitialized, onExchangeSelect])
 
   // Enhanced mouse/touch controls
   useEffect(() => {
@@ -497,13 +569,13 @@ export default function Global3D() {
 
     const controls = controlsRef.current
 
-    const handleStart = (clientX, clientY) => {
+    const handleStart = (clientX: number, clientY: number) => {
       controls.isMouseDown = true
       controls.mouseX = clientX
       controls.mouseY = clientY
     }
 
-    const handleMove = (clientX, clientY) => {
+    const handleMove = (clientX: number, clientY: number) => {
       if (!controls.isMouseDown || !cameraRef.current) return
 
       const deltaX = clientX - controls.mouseX
@@ -522,11 +594,11 @@ export default function Global3D() {
     }
 
     // Mouse events
-    const handleMouseDown = (event) => {
+    const handleMouseDown = (event: MouseEvent) => {
       handleStart(event.clientX, event.clientY)
     }
 
-    const handleMouseMove = (event) => {
+    const handleMouseMove = (event: MouseEvent) => {
       handleMove(event.clientX, event.clientY)
     }
 
@@ -535,27 +607,27 @@ export default function Global3D() {
     }
 
     // Touch events
-    const handleTouchStart = (event) => {
+    const handleTouchStart = (event: TouchEvent) => {
       event.preventDefault()
       if (event.touches.length === 1) {
         handleStart(event.touches[0].clientX, event.touches[0].clientY)
       }
     }
 
-    const handleTouchMove = (event) => {
+    const handleTouchMove = (event: TouchEvent) => {
       event.preventDefault()
       if (event.touches.length === 1) {
         handleMove(event.touches[0].clientX, event.touches[0].clientY)
       }
     }
 
-    const handleTouchEnd = (event) => {
+    const handleTouchEnd = (event: TouchEvent) => {
       event.preventDefault()
       handleEnd()
     }
 
     // Zoom with mouse wheel
-    const handleWheel = (event) => {
+    const handleWheel = (event: WheelEvent) => {
       event.preventDefault()
       if (!cameraRef.current) return
 
@@ -594,7 +666,7 @@ export default function Global3D() {
   useEffect(() => {
     if (!isInitialized) return
 
-    let animationId
+    let animationId: number
 
     const animate = () => {
       animationId = requestAnimationFrame(animate)
@@ -607,17 +679,17 @@ export default function Global3D() {
       controls.currentRotationX += (controls.targetRotationX - controls.currentRotationX) * smoothing
       controls.currentRotationY += (controls.targetRotationY - controls.currentRotationY) * smoothing
       
-      const distance = cameraRef.current.position.length()
+      const distance = cameraRef.current!.position.length()
       const phi = Math.PI / 2 - controls.currentRotationX
       const theta = controls.currentRotationY
       
-      cameraRef.current.position.set(
+      cameraRef.current!.position.set(
         distance * Math.sin(phi) * Math.cos(theta),
         distance * Math.cos(phi),
         distance * Math.sin(phi) * Math.sin(theta)
       )
       
-      cameraRef.current.lookAt(0, 0, 0)
+      cameraRef.current!.lookAt(0, 0, 0)
 
       // Globe rotation
       if (globeRef.current) {
@@ -627,7 +699,7 @@ export default function Global3D() {
       // Animate atmosphere
       if (atmosphereRef.current) {
         atmosphereRef.current.rotation.y += 0.0005
-        const material = atmosphereRef.current.material
+        const material = atmosphereRef.current.material as THREE.MeshBasicMaterial
         material.opacity = 0.06 + 0.02 * Math.sin(elapsedTime * 0.5)
       }
 
@@ -647,7 +719,8 @@ export default function Global3D() {
           const ring = marker.children.find(child => child.userData.isRing)
           if (ring) {
             const pulseOffset = index * 0.5
-            ring.material.opacity = 0.3 + 0.4 * Math.sin(elapsedTime * 2 + pulseOffset)
+            const ringMaterial = (ring as THREE.Mesh).material as THREE.MeshBasicMaterial
+            ringMaterial.opacity = 0.3 + 0.4 * Math.sin(elapsedTime * 2 + pulseOffset)
             const scale = 1 + 0.1 * Math.sin(elapsedTime * 3 + pulseOffset)
             ring.scale.setScalar(scale)
           }
@@ -663,11 +736,12 @@ export default function Global3D() {
         if (connection instanceof THREE.Line) {
           const flowOffset = index * 0.3
           const flow = (elapsedTime * 2 + flowOffset) % (Math.PI * 2)
-          connection.material.opacity = 0.4 + 0.4 * Math.sin(flow)
+          const connectionMaterial = connection.material as THREE.LineBasicMaterial
+          connectionMaterial.opacity = 0.4 + 0.4 * Math.sin(flow)
         }
       })
 
-      rendererRef.current.render(sceneRef.current, cameraRef.current)
+      rendererRef.current!.render(sceneRef.current!, cameraRef.current!)
     }
 
     animate()
