@@ -18,14 +18,14 @@ export default function Global3D({
   onExchangeSelect 
 }: Global3DProps) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const sceneRef = useRef<THREE.Scene>()
-  const rendererRef = useRef<THREE.WebGLRenderer>()
-  const cameraRef = useRef<THREE.PerspectiveCamera>()
-  const globeRef = useRef<THREE.Group>()
-  const atmosphereRef = useRef<THREE.Mesh>()
-  const starsRef = useRef<THREE.Points>()
-  const initRef = useRef(false)
-  const clockRef = useRef(new THREE.Clock())
+  const sceneRef = useRef<THREE.Scene | null>(null)
+const rendererRef = useRef<THREE.WebGLRenderer | null>(null)
+const cameraRef = useRef<THREE.PerspectiveCamera | null>(null)
+const globeRef = useRef<THREE.Group | null>(null)
+const atmosphereRef = useRef<THREE.Mesh | null>(null)
+const starsRef = useRef<THREE.Points | null>(null)
+const initRef = useRef(false)
+const clockRef = useRef(new THREE.Clock())
   const controlsRef = useRef({
     isMouseDown: false,
     mouseX: 0,
@@ -105,7 +105,7 @@ export default function Global3D({
       renderer.setSize(width, height)
     }
 
-    window.addEventListener('resize', handleResize)
+    window.addEventListener('resize', handleResize) 
 
     return () => {
       window.removeEventListener('resize', handleResize)
