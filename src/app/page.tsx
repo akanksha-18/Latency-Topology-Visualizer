@@ -1,103 +1,281 @@
-import Image from "next/image";
+// 'use client'
 
-export default function Home() {
+// import { useState, useEffect } from 'react'
+// import Globe3D  from '../components/Global3D'
+// import { ControlPanel } from '../components/ControlPanel'
+// import {LatencyChart}  from '../components/LatencyChart'
+// import { StatusPanel } from '../components/StatusPanel'
+// import { LoadingScreen } from '../components/LoadingScreen'
+// import { useLatencyData } from '../hooks/useLatencyData'
+// import { useTheme } from '../hooks/useTheme'
+// import type { FilterState, ExchangeData } from '../types/index'
+
+// export default function Home() {
+//   const [isLoading, setIsLoading] = useState(true)
+//   const [selectedExchange, setSelectedExchange] = useState<ExchangeData | null>(null)
+//   const [filters, setFilters] = useState<FilterState>({
+//     exchanges: [],
+//     cloudProviders: ['aws', 'gcp', 'azure'],
+//     latencyRange: [0, 1000],
+//     showRealTime: true,
+//     showHistorical: false,
+//     showRegions: true,
+//   })
+  
+//   const { theme, toggleTheme } = useTheme()
+//   const { latencyData, exchangeData, isUpdating } = useLatencyData()
+
+//   useEffect(() => {
+//     const timer = setTimeout(() => setIsLoading(false), 2000)
+//     return () => clearTimeout(timer)
+//   }, [])
+
+//   if (isLoading) {
+//     return <LoadingScreen />
+//   }
+
+//   return (
+//     <div className={`min-h-screen ${theme === 'dark' ? 'dark bg-dark-bg' : 'bg-gray-50'} transition-colors duration-300`}>
+//       <div className="flex h-screen overflow-hidden">
+//         {/* Main 3D Visualization */}
+//         <div className="flex-1 relative">
+//           <Globe3D
+//             exchangeData={exchangeData}
+//             latencyData={latencyData}
+//             filters={filters}
+//             selectedExchange={selectedExchange}
+//             onExchangeSelect={setSelectedExchange}
+//           />
+          
+//           {/* Status Panel Overlay */}
+//           <div className="absolute top-4 right-4 z-10">
+//             <StatusPanel 
+//               isUpdating={isUpdating}
+//               theme={theme}
+//               onToggleTheme={toggleTheme}
+//             />
+//           </div>
+//         </div>
+
+//         {/* Side Panel */}
+//         <div className="w-96 bg-white dark:bg-dark-surface shadow-xl border-l border-gray-200 dark:border-gray-700 overflow-y-auto">
+//           <ControlPanel
+//             filters={filters}
+//             onFiltersChange={setFilters}
+//             exchangeData={exchangeData}
+//             selectedExchange={selectedExchange}
+//             onExchangeSelect={setSelectedExchange}
+//           />
+          
+//           {selectedExchange && (
+//             <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+//               <LatencyChart
+//                 exchangeData={selectedExchange}
+//                 latencyData={latencyData}
+//                 timeRange="24h"
+//               />
+//             </div>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
+
+'use client'
+
+import { useState, useEffect } from 'react'
+import Globe3D from '../components/Global3D'
+import { ControlPanel } from '../components/ControlPanel'
+import { LatencyChart } from '../components/LatencyChart'
+import { StatusPanel } from '../components/StatusPanel'
+import { LoadingScreen } from '../components/LoadingScreen'
+import { useLatencyData } from '../hooks/useLatencyData'
+import { useTheme } from '../hooks/useTheme'
+import type { FilterState, ExchangeData } from '../types/index'
+
+function HomePage() {
+  const [isLoading, setIsLoading] = useState(true)
+  const [selectedExchange, setSelectedExchange] = useState<ExchangeData | null>(null)
+  const [isSidePanelOpen, setIsSidePanelOpen] = useState(false)
+  const [filters, setFilters] = useState<FilterState>({
+    exchanges: [],
+    cloudProviders: ['aws', 'gcp', 'azure'],
+    latencyRange: [0, 1000],
+    showRealTime: true,
+    showHistorical: false,
+    showRegions: true,
+  })
+
+  const { theme, toggleTheme } = useTheme()
+  const { latencyData, exchangeData, isUpdating } = useLatencyData()
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 2000)
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Close side panel when clicking outside on mobile
+  const handleOverlayClick = () => {
+    if (isSidePanelOpen) {
+      setIsSidePanelOpen(false)
+    }
+  }
+
+  if (isLoading) {
+    return <LoadingScreen />
+  }
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className={`min-h-screen ${theme === 'dark' ? 'dark bg-dark-bg' : 'bg-gray-50'} transition-colors duration-300`}>
+      {/* Mobile/Tablet Layout */}
+      <div className="lg:hidden flex flex-col h-screen">
+        {/* Mobile Header */}
+        <div className="bg-white dark:bg-dark-surface border-b border-gray-200 dark:border-gray-700 p-3 flex items-center justify-between z-20 relative">
+          <button
+            onClick={() => setIsSidePanelOpen(true)}
+            className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+            aria-label="Open control panel"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          
+          <StatusPanel
+            isUpdating={isUpdating}
+            theme={theme}
+            onToggleTheme={toggleTheme}
+          />
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+
+        {/* Main 3D Visualization - Mobile */}
+        <div className="flex-1 relative">
+          <Globe3D
+            exchangeData={exchangeData}
+            latencyData={latencyData}
+            filters={filters}
+            selectedExchange={selectedExchange}
+            onExchangeSelect={setSelectedExchange}
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+        </div>
+
+        {/* Mobile Side Panel Overlay */}
+        {isSidePanelOpen && (
+          <>
+            {/* Backdrop */}
+            <div 
+              className="fixed inset-0 bg-black bg-opacity-50 z-30"
+              onClick={handleOverlayClick}
+            />
+            
+            {/* Side Panel */}
+            <div className="fixed top-0 right-0 h-full w-full max-w-sm bg-white dark:bg-dark-surface shadow-xl z-40 transform transition-transform duration-300 overflow-y-auto">
+              <div className="p-3 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <h2 className="text-lg font-semibold">Controls</h2>
+                <button
+                  onClick={() => setIsSidePanelOpen(false)}
+                  className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800"
+                  aria-label="Close control panel"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <ControlPanel
+                filters={filters}
+                onFiltersChange={setFilters}
+                exchangeData={exchangeData}
+                selectedExchange={selectedExchange}
+                onExchangeSelect={setSelectedExchange}
+              />
+              
+              {selectedExchange && (
+                <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                  <LatencyChart
+                    exchangeData={selectedExchange}
+                    latencyData={latencyData}
+                    timeRange="24h"
+                  />
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* Bottom Chart Panel for Mobile (when exchange selected) */}
+        {selectedExchange && !isSidePanelOpen && (
+          <div className="bg-white dark:bg-dark-surface border-t border-gray-200 dark:border-gray-700 p-3 max-h-64 overflow-hidden">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium truncate">{selectedExchange.name}</h3>
+              <button
+                onClick={() => setSelectedExchange(null)}
+                className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 ml-2"
+                aria-label="Close chart"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="h-32">
+              <LatencyChart
+                exchangeData={selectedExchange}
+                latencyData={latencyData}
+                timeRange="24h"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Desktop/Large Screen Layout */}
+      <div className="hidden lg:flex h-screen overflow-hidden">
+        {/* Main 3D Visualization */}
+        <div className="flex-1 relative">
+          <Globe3D
+            exchangeData={exchangeData}
+            latencyData={latencyData}
+            filters={filters}
+            selectedExchange={selectedExchange}
+            onExchangeSelect={setSelectedExchange}
           />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
+          
+          {/* Status Panel Overlay */}
+          <div className="absolute top-4 right-4 z-10">
+            <StatusPanel
+              isUpdating={isUpdating}
+              theme={theme}
+              onToggleTheme={toggleTheme}
+            />
+          </div>
+        </div>
+
+        {/* Side Panel - Desktop */}
+        <div className="w-80 xl:w-96 bg-white dark:bg-dark-surface shadow-xl border-l border-gray-200 dark:border-gray-700 overflow-y-auto">
+          <ControlPanel
+            filters={filters}
+            onFiltersChange={setFilters}
+            exchangeData={exchangeData}
+            selectedExchange={selectedExchange}
+            onExchangeSelect={setSelectedExchange}
           />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          
+          {selectedExchange && (
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+              <LatencyChart
+                exchangeData={selectedExchange}
+                latencyData={latencyData}
+                timeRange="24h"
+              />
+            </div>
+          )}
+        </div>
+      </div>
     </div>
-  );
+  )
 }
+
+export default HomePage
