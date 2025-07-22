@@ -8,7 +8,7 @@ export function useLatencyData() {
   const [exchangeData, setExchangeData] = useState<ExchangeData[]>([])
   const [isUpdating, setIsUpdating] = useState(true)
 
-  // Mock exchange data
+  
   const mockExchanges: ExchangeData[] = [
     {
       id: 'binance-us-east',
@@ -76,7 +76,7 @@ export function useLatencyData() {
     }
   ]
 
-  // Generate mock latency data
+  
   const generateLatencyData = (): LatencyData[] => {
     const connections: LatencyData[] = []
     
@@ -85,7 +85,7 @@ export function useLatencyData() {
         const source = mockExchanges[i]
         const target = mockExchanges[j]
         
-        // Calculate approximate latency based on distance and cloud provider
+    
         const distance = calculateDistance(source.location, target.location)
         const baseLatency = Math.min(300, distance / 100 + 20)
         const providerPenalty = source.cloudProvider !== target.cloudProvider ? 15 : 0
@@ -109,7 +109,7 @@ export function useLatencyData() {
     pos1: { lat: number; lng: number },
     pos2: { lat: number; lng: number }
   ): number => {
-    const R = 6371 // Earth's radius in km
+    const R = 6371 
     const dLat = (pos2.lat - pos1.lat) * Math.PI / 180
     const dLon = (pos2.lng - pos1.lng) * Math.PI / 180
     const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -119,20 +119,18 @@ export function useLatencyData() {
     return R * c
   }
 
-  // Initialize data
   useEffect(() => {
     setExchangeData(mockExchanges)
     setLatencyData(generateLatencyData())
   }, [])
 
-  // Update latency data periodically
   useEffect(() => {
     if (!isUpdating) return
 
     const interval = setInterval(() => {
       setLatencyData(generateLatencyData())
       
-      // Update exchange latencies
+      
       setExchangeData(prev => prev.map(exchange => ({
         ...exchange,
         latency: Math.max(10, exchange.latency + (Math.random() - 0.5) * 10)

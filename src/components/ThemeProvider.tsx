@@ -20,12 +20,12 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    // Check for saved theme in localStorage
+   
     const savedTheme = localStorage.getItem('theme') as Theme
     if (savedTheme) {
       setTheme(savedTheme)
     } else {
-      // Check system preference
+      
       const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
       setTheme(prefersDark ? 'dark' : 'light')
     }
@@ -34,16 +34,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const root = window.document.documentElement
     
-    // Remove both classes first
+    
     root.classList.remove('light', 'dark')
     
-    // Add the current theme class
+    
     root.classList.add(theme)
     
-    // Save to localStorage
-    localStorage.setItem('theme', theme)
     
-    // Also set data attribute for better compatibility
+    localStorage.setItem('theme', theme)
+  
     root.setAttribute('data-theme', theme)
   }, [theme])
 

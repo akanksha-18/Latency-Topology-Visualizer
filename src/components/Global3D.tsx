@@ -1,5 +1,6 @@
 import { useRef, useEffect, useState } from 'react'
 import * as THREE from 'three'
+
 import type { ExchangeData, LatencyData, FilterState } from '../types'
 
 interface Global3DProps {
@@ -38,7 +39,8 @@ const clockRef = useRef(new THREE.Clock())
   
   const [isInitialized, setIsInitialized] = useState(false)
   const [showLatency, setShowLatency] = useState(true)
-
+ const [hoveredExchange, setHoveredExchange] = useState<ExchangeData | null>(null)
+const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 })
   // Initialize Three.js scene
   useEffect(() => {
     if (!containerRef.current || initRef.current) return
@@ -396,74 +398,148 @@ const clockRef = useRef(new THREE.Clock())
     })
   }, [showLatency, isInitialized, latencyData, exchangeData, filters])
 
+  // function createExchangeMarker(exchange: ExchangeData) {
+  //   const group = new THREE.Group()
+    
+  //   const phi = (90 - exchange.location.lat) * (Math.PI / 180)
+  //   const theta = (exchange.location.lng + 180) * (Math.PI / 180)
+  //   const radius = 5.4
+
+  //   const x = radius * Math.sin(phi) * Math.cos(theta)
+  //   const y = radius * Math.cos(phi)
+  //   const z = radius * Math.sin(phi) * Math.sin(theta)
+
+  //   // Core marker
+  //   const coreGeometry = new THREE.SphereGeometry(0.08, 16, 16)
+  //   const color = getCloudProviderColor(exchange.cloudProvider)
+  //   const coreMaterial = new THREE.MeshBasicMaterial({ 
+  //     color,
+  //     transparent: true,
+  //     opacity: selectedExchange?.id === exchange.id ? 1.0 : 0.9
+  //   })
+  //   const core = new THREE.Mesh(coreGeometry, coreMaterial)
+
+  //   // Glow sphere
+  //   const glowGeometry = new THREE.SphereGeometry(0.15, 16, 16)
+  //   const glowMaterial = new THREE.MeshBasicMaterial({
+  //     color,
+  //     transparent: true,
+  //     opacity: selectedExchange?.id === exchange.id ? 0.5 : 0.3,
+  //     blending: THREE.AdditiveBlending
+  //   })
+  //   const glow = new THREE.Mesh(glowGeometry, glowMaterial)
+
+  //   // Pulsing ring
+  //   const ringGeometry = new THREE.RingGeometry(0.18, 0.25, 32)
+  //   const ringMaterial = new THREE.MeshBasicMaterial({
+  //     color,
+  //     transparent: true,
+  //     opacity: 0.6,
+  //     side: THREE.DoubleSide,
+  //     blending: THREE.AdditiveBlending
+  //   })
+  //   const ring = new THREE.Mesh(ringGeometry, ringMaterial)
+  //   ring.lookAt(x * 2, y * 2, z * 2)
+  //   ring.userData.isRing = true
+
+  //   // Vertical beam
+  //   const beamGeometry = new THREE.CylinderGeometry(0.02, 0.02, 1.5, 8)
+  //   const beamMaterial = new THREE.MeshBasicMaterial({
+  //     color,
+  //     transparent: true,
+  //     opacity: 0.4,
+  //     blending: THREE.AdditiveBlending
+  //   })
+  //   const beam = new THREE.Mesh(beamGeometry, beamMaterial)
+  //   beam.position.y = 0.75
+
+  //   group.add(core)
+  //   group.add(glow)
+  //   group.add(ring)
+  //   group.add(beam)
+
+  //   group.position.set(x, y, z)
+    
+  //   // Point towards center
+  //   const direction = new THREE.Vector3(-x, -y, -z).normalize()
+  //   group.lookAt(group.position.clone().add(direction))
+
+  //   return group
+  // }
   function createExchangeMarker(exchange: ExchangeData) {
-    const group = new THREE.Group()
-    
-    const phi = (90 - exchange.location.lat) * (Math.PI / 180)
-    const theta = (exchange.location.lng + 180) * (Math.PI / 180)
-    const radius = 5.4
+  const group = new THREE.Group()
+  
+  const phi = (90 - exchange.location.lat) * (Math.PI / 180)
+  const theta = (exchange.location.lng + 180) * (Math.PI / 180)
+  const radius = 5.4
 
-    const x = radius * Math.sin(phi) * Math.cos(theta)
-    const y = radius * Math.cos(phi)
-    const z = radius * Math.sin(phi) * Math.sin(theta)
+  const x = radius * Math.sin(phi) * Math.cos(theta)
+  const y = radius * Math.cos(phi)
+  const z = radius * Math.sin(phi) * Math.sin(theta)
 
-    // Core marker
-    const coreGeometry = new THREE.SphereGeometry(0.08, 16, 16)
-    const color = getCloudProviderColor(exchange.cloudProvider)
-    const coreMaterial = new THREE.MeshBasicMaterial({ 
-      color,
-      transparent: true,
-      opacity: selectedExchange?.id === exchange.id ? 1.0 : 0.9
-    })
-    const core = new THREE.Mesh(coreGeometry, coreMaterial)
+  // Core marker
+  const coreGeometry = new THREE.SphereGeometry(0.08, 16, 16)
+  const color = getCloudProviderColor(exchange.cloudProvider)
+  const isSelected = selectedExchange?.id === exchange.id
+  const isHovered = hoveredExchange?.id === exchange.id
+  
+  const coreMaterial = new THREE.MeshBasicMaterial({ 
+    color,
+    transparent: true,
+    opacity: isSelected ? 1.0 : isHovered ? 0.95 : 0.9
+  })
+  const core = new THREE.Mesh(coreGeometry, coreMaterial)
 
-    // Glow sphere
-    const glowGeometry = new THREE.SphereGeometry(0.15, 16, 16)
-    const glowMaterial = new THREE.MeshBasicMaterial({
-      color,
-      transparent: true,
-      opacity: selectedExchange?.id === exchange.id ? 0.5 : 0.3,
-      blending: THREE.AdditiveBlending
-    })
-    const glow = new THREE.Mesh(glowGeometry, glowMaterial)
+  // Glow sphere - enhanced for hover
+  const glowSize = isHovered ? 0.18 : 0.15
+  const glowGeometry = new THREE.SphereGeometry(glowSize, 16, 16)
+  const glowMaterial = new THREE.MeshBasicMaterial({
+    color,
+    transparent: true,
+    opacity: isSelected ? 0.5 : isHovered ? 0.4 : 0.3,
+    blending: THREE.AdditiveBlending
+  })
+  const glow = new THREE.Mesh(glowGeometry, glowMaterial)
 
-    // Pulsing ring
-    const ringGeometry = new THREE.RingGeometry(0.18, 0.25, 32)
-    const ringMaterial = new THREE.MeshBasicMaterial({
-      color,
-      transparent: true,
-      opacity: 0.6,
-      side: THREE.DoubleSide,
-      blending: THREE.AdditiveBlending
-    })
-    const ring = new THREE.Mesh(ringGeometry, ringMaterial)
-    ring.lookAt(x * 2, y * 2, z * 2)
-    ring.userData.isRing = true
+  // Pulsing ring - enhanced for hover
+  const ringSize = isHovered ? 0.28 : 0.25
+  const ringGeometry = new THREE.RingGeometry(0.18, ringSize, 32)
+  const ringMaterial = new THREE.MeshBasicMaterial({
+    color,
+    transparent: true,
+    opacity: isHovered ? 0.8 : 0.6,
+    side: THREE.DoubleSide,
+    blending: THREE.AdditiveBlending
+  })
+  const ring = new THREE.Mesh(ringGeometry, ringMaterial)
+  ring.lookAt(x * 2, y * 2, z * 2)
+  ring.userData.isRing = true
 
-    // Vertical beam
-    const beamGeometry = new THREE.CylinderGeometry(0.02, 0.02, 1.5, 8)
-    const beamMaterial = new THREE.MeshBasicMaterial({
-      color,
-      transparent: true,
-      opacity: 0.4,
-      blending: THREE.AdditiveBlending
-    })
-    const beam = new THREE.Mesh(beamGeometry, beamMaterial)
-    beam.position.y = 0.75
+  // Vertical beam - enhanced for hover
+  const beamHeight = isHovered ? 2.0 : 1.5
+  const beamGeometry = new THREE.CylinderGeometry(0.02, 0.02, beamHeight, 8)
+  const beamMaterial = new THREE.MeshBasicMaterial({
+    color,
+    transparent: true,
+    opacity: isHovered ? 0.6 : 0.4,
+    blending: THREE.AdditiveBlending
+  })
+  const beam = new THREE.Mesh(beamGeometry, beamMaterial)
+  beam.position.y = beamHeight / 2
 
-    group.add(core)
-    group.add(glow)
-    group.add(ring)
-    group.add(beam)
+  group.add(core)
+  group.add(glow)
+  group.add(ring)
+  group.add(beam)
 
-    group.position.set(x, y, z)
-    
-    // Point towards center
-    const direction = new THREE.Vector3(-x, -y, -z).normalize()
-    group.lookAt(group.position.clone().add(direction))
+  group.position.set(x, y, z)
+  
+  // Point towards center
+  const direction = new THREE.Vector3(-x, -y, -z).normalize()
+  group.lookAt(group.position.clone().add(direction))
 
-    return group
-  }
+  return group
+}
 
   function createLatencyConnection(source: ExchangeData, target: ExchangeData, latencyData: LatencyData) {
     const sourcePos = getPositionFromLatLng(source.location.lat, source.location.lng)
@@ -562,6 +638,65 @@ const clockRef = useRef(new THREE.Clock())
       }
     }
   }, [isInitialized, onExchangeSelect])
+
+  useEffect(() => {
+  if (!containerRef.current || !isInitialized) return
+
+  const raycaster = new THREE.Raycaster()
+  const mouse = new THREE.Vector2()
+
+  const handleMouseMove = (event: MouseEvent) => {
+    if (!cameraRef.current || !sceneRef.current || !globeRef.current) return
+
+    const rect = containerRef.current!.getBoundingClientRect()
+    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1
+    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1
+
+    // Update mouse position for tooltip
+    setMousePosition({ x: event.clientX, y: event.clientY })
+
+    raycaster.setFromCamera(mouse, cameraRef.current)
+    
+    const markers = globeRef.current.children.filter(child => 
+      child.userData.type === 'exchange-marker'
+    )
+    
+    const intersects = raycaster.intersectObjects(markers, true)
+    
+    if (intersects.length > 0) {
+      let parent = intersects[0].object
+      while (parent && !parent.userData.exchange) {
+        parent = parent.parent!
+      }
+      
+      if (parent && parent.userData.exchange) {
+        setHoveredExchange(parent.userData.exchange)
+        // Change cursor to pointer
+        containerRef.current!.style.cursor = 'pointer'
+      }
+    } else {
+      setHoveredExchange(null)
+      // Reset cursor
+      containerRef.current!.style.cursor = 'grab'
+    }
+  }
+   const handleMouseLeave = () => {
+    setHoveredExchange(null)
+    if (containerRef.current) {
+      containerRef.current.style.cursor = 'grab'
+    }
+  }
+
+  containerRef.current.addEventListener('mousemove', handleMouseMove)
+  containerRef.current.addEventListener('mouseleave', handleMouseLeave)
+
+  return () => {
+    if (containerRef.current) {
+      containerRef.current.removeEventListener('mousemove', handleMouseMove)
+      containerRef.current.removeEventListener('mouseleave', handleMouseLeave)
+    }
+  }
+}, [isInitialized])
 
   // Enhanced mouse/touch controls
   useEffect(() => {
@@ -709,23 +844,32 @@ const clockRef = useRef(new THREE.Clock())
         starsRef.current.rotation.x += 0.00005
       }
 
-      // Animate markers
+   
+
       const markers = globeRef.current?.children.filter(child =>
-        child.userData.type === 'exchange-marker'
-      ) || []
+  child.userData.type === 'exchange-marker'
+) || []
+
+markers.forEach((marker, index) => {
+  if (marker instanceof THREE.Group) {
+    const exchange = marker.userData.exchange
+    const isHovered = hoveredExchange?.id === exchange?.id
+    
+    const ring = marker.children.find(child => child.userData.isRing)
+    if (ring) {
+      const pulseOffset = index * 0.5
+      const ringMaterial = (ring as THREE.Mesh).material as THREE.MeshBasicMaterial
+      const baseOpacity = isHovered ? 0.5 : 0.3
+      const pulseIntensity = isHovered ? 0.5 : 0.4
+      ringMaterial.opacity = baseOpacity + pulseIntensity * Math.sin(elapsedTime * 2 + pulseOffset)
       
-      markers.forEach((marker, index) => {
-        if (marker instanceof THREE.Group) {
-          const ring = marker.children.find(child => child.userData.isRing)
-          if (ring) {
-            const pulseOffset = index * 0.5
-            const ringMaterial = (ring as THREE.Mesh).material as THREE.MeshBasicMaterial
-            ringMaterial.opacity = 0.3 + 0.4 * Math.sin(elapsedTime * 2 + pulseOffset)
-            const scale = 1 + 0.1 * Math.sin(elapsedTime * 3 + pulseOffset)
-            ring.scale.setScalar(scale)
-          }
-        }
-      })
+      const baseScale = isHovered ? 1.1 : 1
+      const scaleVariation = isHovered ? 0.15 : 0.1
+      const scale = baseScale + scaleVariation * Math.sin(elapsedTime * 3 + pulseOffset)
+      ring.scale.setScalar(scale)
+    }
+  }
+})
 
       // Animate connections
       const connections = globeRef.current?.children.filter(child =>
@@ -775,17 +919,7 @@ const clockRef = useRef(new THREE.Clock())
           <div>📱 <strong>Touch & drag</strong> on mobile</div>
         </div>
         
-        <div className="mt-4">
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={showLatency}
-              onChange={(e) => setShowLatency(e.target.checked)}
-              className="rounded"
-            />
-            Show Connections
-          </label>
-        </div>
+       
       </div>
 
       {/* Legend */}
@@ -833,6 +967,36 @@ const clockRef = useRef(new THREE.Clock())
           <div className="text-blue-400 text-lg animate-pulse">Loading 3D Globe...</div>
         </div>
       )}
+      {/* Hover Tooltip */}
+{hoveredExchange && (
+  <div 
+    className="absolute pointer-events-none z-50 bg-black/90 backdrop-blur-sm border border-blue-500/30 rounded-lg p-3 text-white text-sm shadow-2xl"
+    style={{
+      left: mousePosition.x + 15,
+      top: mousePosition.y - 10,
+      transform: 'translateY(-100%)'
+    }}
+  >
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <div 
+          className="w-3 h-3 rounded-full"
+          style={{ backgroundColor: `#${getCloudProviderColor(hoveredExchange.cloudProvider).toString(16).padStart(6, '0')}` }}
+        />
+        <span className="font-bold text-blue-400">{hoveredExchange.name}</span>
+      </div>
+      <div className="text-gray-300">
+        <div><strong>Location:</strong> {hoveredExchange.location.city}, {hoveredExchange.location.country}</div>
+        <div><strong>Provider:</strong> {hoveredExchange.cloudProvider.toUpperCase()}</div>
+        <div><strong>Coordinates:</strong> {hoveredExchange.location.lat.toFixed(2)}°, {hoveredExchange.location.lng.toFixed(2)}°</div>
+        {hoveredExchange.region && <div><strong>Region:</strong> {hoveredExchange.region}</div>}
+      </div>
+    </div>
+    {/* Tooltip arrow */}
+    <div className="absolute top-full left-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-blue-500/30"></div>
+  </div>
+)}
+
     </div>
   )
 }

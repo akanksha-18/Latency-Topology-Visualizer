@@ -1,120 +1,3 @@
-// 'use client'
-
-// import { useState, useEffect } from 'react'
-// import { Wifi, WifiOff, Sun, Moon, Activity, Gauge } from 'lucide-react'
-
-// interface StatusPanelProps {
-//   isUpdating: boolean
-//   theme: 'light' | 'dark'
-//   onToggleTheme: () => void
-// }
-
-// export function StatusPanel({ isUpdating, theme, onToggleTheme }: StatusPanelProps) {
-//   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected'>('connected')
-//   const [lastUpdate, setLastUpdate] = useState(new Date())
-//   const [systemHealth, setSystemHealth] = useState(98)
-
-//   useEffect(() => {
-//     const interval = setInterval(() => {
-//       setLastUpdate(new Date())
-//       // Simulate occasional connection issues
-//       setConnectionStatus(Math.random() > 0.95 ? 'disconnected' : 'connected')
-//       // Simulate system health fluctuation
-//       setSystemHealth(95 + Math.random() * 5)
-//     }, 5000)
-
-//     return () => clearInterval(interval)
-//   }, [])
-
-//   return (
-//     <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-lg p-4 space-y-3 min-w-[200px] border border-gray-200 dark:border-gray-700">
-//       <div className="flex items-center justify-between">
-//         <h3 className="text-sm font-semibold text-gray-900 dark:text-white">System Status</h3>
-//         <button
-//           onClick={onToggleTheme}
-//           className="p-1.5 rounded-md bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
-//         >
-//           {theme === 'dark' ? (
-//             <Sun className="w-4 h-4 text-yellow-500" />
-//           ) : (
-//             <Moon className="w-4 h-4 text-blue-500" />
-//           )}
-//         </button>
-//       </div>
-
-//       {/* Connection Status */}
-//       <div className="flex items-center justify-between">
-//         <div className="flex items-center space-x-2">
-//           {connectionStatus === 'connected' ? (
-//             <Wifi className="w-4 h-4 text-green-500" />
-//           ) : (
-//             <WifiOff className="w-4 h-4 text-red-500" />
-//           )}
-//           <span className="text-sm text-gray-600 dark:text-gray-400">Connection</span>
-//         </div>
-//         <span className={`text-sm font-medium ${
-//           connectionStatus === 'connected' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-//         }`}>
-//           {connectionStatus === 'connected' ? 'Online' : 'Offline'}
-//         </span>
-//       </div>
-
-//       {/* Update Status */}
-//       <div className="flex items-center justify-between">
-//         <div className="flex items-center space-x-2">
-//           <Activity className={`w-4 h-4 ${isUpdating ? 'text-blue-500 animate-pulse' : 'text-gray-400'}`} />
-//           <span className="text-sm text-gray-600 dark:text-gray-400">Updates</span>
-//         </div>
-//         <span className={`text-sm ${isUpdating ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'}`}>
-//           {isUpdating ? 'Live' : 'Paused'}
-//         </span>
-//       </div>
-
-//       {/* System Health */}
-//       <div className="flex items-center justify-between">
-//         <div className="flex items-center space-x-2">
-//           <Gauge className="w-4 h-4 text-purple-500" />
-//           <span className="text-sm text-gray-600 dark:text-gray-400">Health</span>
-//         </div>
-//         <span className="text-sm font-medium text-purple-600 dark:text-purple-400">
-//           {Math.round(systemHealth)}%
-//         </span>
-//       </div>
-
-//       {/* Last Update */}
-//       <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
-//         <div className="text-xs text-gray-500 dark:text-gray-400">
-//           Last update: {lastUpdate.toLocaleTimeString()}
-//         </div>
-//         <div className="mt-1">
-//           <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1">
-//             <div 
-//               className="bg-blue-500 dark:bg-blue-400 h-1 rounded-full transition-all duration-1000"
-//               style={{ width: `${systemHealth}%` }}
-//             ></div>
-//           </div>
-//         </div>
-//       </div>
-
-//       {/* Performance Indicators */}
-//       <div className="grid grid-cols-3 gap-2 text-xs">
-//         <div className="text-center">
-//           <div className="text-gray-500 dark:text-gray-400">CPU</div>
-//           <div className="text-green-600 dark:text-green-400 font-medium">23%</div>
-//         </div>
-//         <div className="text-center">
-//           <div className="text-gray-500 dark:text-gray-400">RAM</div>
-//           <div className="text-yellow-600 dark:text-yellow-400 font-medium">67%</div>
-//         </div>
-//         <div className="text-center">
-//           <div className="text-gray-500 dark:text-gray-400">FPS</div>
-//           <div className="text-blue-600 dark:text-blue-400 font-medium">60</div>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -140,8 +23,28 @@ export function StatusPanel({
   const [systemHealth, setSystemHealth] = useState(98)
   const [isExpanded, setIsExpanded] = useState(!compact)
   const [windowWidth, setWindowWidth] = useState(0)
+  const [isDark, setIsDark] = useState(false)
 
-  // Track window size for responsive behavior
+  // Monitor theme changes
+  useEffect(() => {
+    const checkTheme = () => {
+      const themeAttr = document.documentElement.getAttribute('data-theme')
+      setIsDark(themeAttr === 'dark')
+    }
+
+    // Initial check
+    checkTheme()
+
+    // Create observer for theme changes
+    const observer = new MutationObserver(checkTheme)
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme']
+    })
+
+    return () => observer.disconnect()
+  }, [])
+
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth)
@@ -155,9 +58,7 @@ export function StatusPanel({
   useEffect(() => {
     const interval = setInterval(() => {
       setLastUpdate(new Date())
-      // Simulate occasional connection issues
       setConnectionStatus(Math.random() > 0.95 ? 'disconnected' : 'connected')
-      // Simulate system health fluctuation
       setSystemHealth(95 + Math.random() * 5)
     }, 5000)
 
@@ -172,8 +73,11 @@ export function StatusPanel({
 
   return (
     <div className={`
-      bg-white/90 dark:bg-gray-900/90 backdrop-blur-md rounded-lg border border-gray-200 dark:border-gray-700 
-      transition-all duration-300 ease-in-out
+      backdrop-blur-md rounded-lg border transition-all duration-300 ease-in-out
+      ${isDark 
+        ? 'bg-gray-900/90 border-gray-700' 
+        : 'bg-white/90 border-gray-200'
+      }
       ${shouldUseCompactLayout ? 'p-3' : 'p-4'}
       ${isMobile ? 'mx-2 w-auto' : 'min-w-[200px]'}
       ${className}
@@ -181,9 +85,9 @@ export function StatusPanel({
       {/* Header - Always visible */}
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <h3 className={`font-semibold text-gray-900 dark:text-white ${
-            shouldUseCompactLayout ? 'text-sm' : 'text-sm'
-          }`}>
+          <h3 className={`font-semibold ${
+            isDark ? 'text-white' : 'text-gray-900'
+          } ${shouldUseCompactLayout ? 'text-sm' : 'text-sm'}`}>
             {shouldUseCompactLayout && !isExpanded ? 'Status' : 'System Status'}
           </h3>
           
@@ -203,11 +107,13 @@ export function StatusPanel({
         <div className="flex items-center space-x-1">
           <button
             onClick={onToggleTheme}
-            className={`rounded-md bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors ${
-              shouldUseCompactLayout ? 'p-1' : 'p-1.5'
-            }`}
+            className={`rounded-md transition-colors ${
+              isDark 
+                ? 'bg-gray-800 hover:bg-gray-700' 
+                : 'bg-gray-100 hover:bg-gray-200'
+            } ${shouldUseCompactLayout ? 'p-1' : 'p-1.5'}`}
           >
-            {theme === 'dark' ? (
+            {isDark ? (
               <Sun className={`text-yellow-500 ${shouldUseCompactLayout ? 'w-3 h-3' : 'w-4 h-4'}`} />
             ) : (
               <Moon className={`text-blue-500 ${shouldUseCompactLayout ? 'w-3 h-3' : 'w-4 h-4'}`} />
@@ -218,12 +124,20 @@ export function StatusPanel({
           {shouldUseCompactLayout && (
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="p-1 rounded-md bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+              className={`p-1 rounded-md transition-colors ${
+                isDark 
+                  ? 'bg-gray-800 hover:bg-gray-700' 
+                  : 'bg-gray-100 hover:bg-gray-200'
+              }`}
             >
               {isExpanded ? (
-                <ChevronUp className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                <ChevronUp className={`w-3 h-3 ${
+                  isDark ? 'text-gray-400' : 'text-gray-600'
+                }`} />
               ) : (
-                <ChevronDown className="w-3 h-3 text-gray-600 dark:text-gray-400" />
+                <ChevronDown className={`w-3 h-3 ${
+                  isDark ? 'text-gray-400' : 'text-gray-600'
+                }`} />
               )}
             </button>
           )}
@@ -247,16 +161,16 @@ export function StatusPanel({
             ) : (
               <WifiOff className={`text-red-500 ${shouldUseCompactLayout ? 'w-3 h-3' : 'w-4 h-4'}`} />
             )}
-            <span className={`text-gray-600 dark:text-gray-400 ${
-              shouldUseCompactLayout ? 'text-xs' : 'text-sm'
-            }`}>
+            <span className={`${
+              isDark ? 'text-gray-400' : 'text-gray-600'
+            } ${shouldUseCompactLayout ? 'text-xs' : 'text-sm'}`}>
               Connection
             </span>
           </div>
           <span className={`font-medium ${
             connectionStatus === 'connected' 
-              ? 'text-green-600 dark:text-green-400' 
-              : 'text-red-600 dark:text-red-400'
+              ? isDark ? 'text-green-400' : 'text-green-600'
+              : isDark ? 'text-red-400' : 'text-red-600'
           } ${shouldUseCompactLayout ? 'text-xs' : 'text-sm'}`}>
             {connectionStatus === 'connected' ? 'Online' : 'Offline'}
           </span>
@@ -270,14 +184,16 @@ export function StatusPanel({
             <Activity className={`${shouldUseCompactLayout ? 'w-3 h-3' : 'w-4 h-4'} ${
               isUpdating ? 'text-blue-500 animate-pulse' : 'text-gray-400'
             }`} />
-            <span className={`text-gray-600 dark:text-gray-400 ${
-              shouldUseCompactLayout ? 'text-xs' : 'text-sm'
-            }`}>
+            <span className={`${
+              isDark ? 'text-gray-400' : 'text-gray-600'
+            } ${shouldUseCompactLayout ? 'text-xs' : 'text-sm'}`}>
               Updates
             </span>
           </div>
           <span className={`${
-            isUpdating ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'
+            isUpdating 
+              ? isDark ? 'text-blue-400' : 'text-blue-600'
+              : isDark ? 'text-gray-400' : 'text-gray-500'
           } ${shouldUseCompactLayout ? 'text-xs' : 'text-sm'}`}>
             {isUpdating ? 'Live' : 'Paused'}
           </span>
@@ -289,26 +205,26 @@ export function StatusPanel({
         }`}>
           <div className="flex items-center space-x-2">
             <Gauge className={`text-purple-500 ${shouldUseCompactLayout ? 'w-3 h-3' : 'w-4 h-4'}`} />
-            <span className={`text-gray-600 dark:text-gray-400 ${
-              shouldUseCompactLayout ? 'text-xs' : 'text-sm'
-            }`}>
+            <span className={`${
+              isDark ? 'text-gray-400' : 'text-gray-600'
+            } ${shouldUseCompactLayout ? 'text-xs' : 'text-sm'}`}>
               Health
             </span>
           </div>
-          <span className={`font-medium text-purple-600 dark:text-purple-400 ${
-            shouldUseCompactLayout ? 'text-xs' : 'text-sm'
-          }`}>
+          <span className={`font-medium ${
+            isDark ? 'text-purple-400' : 'text-purple-600'
+          } ${shouldUseCompactLayout ? 'text-xs' : 'text-sm'}`}>
             {Math.round(systemHealth)}%
           </span>
         </div>
 
         {/* Last Update */}
-        <div className={`border-t border-gray-200 dark:border-gray-700 ${
-          shouldUseCompactLayout ? 'pt-2' : 'pt-2'
-        }`}>
-          <div className={`text-gray-500 dark:text-gray-400 ${
-            shouldUseCompactLayout ? 'text-xs' : 'text-xs'
-          }`}>
+        <div className={`border-t ${
+          isDark ? 'border-gray-700' : 'border-gray-200'
+        } ${shouldUseCompactLayout ? 'pt-2' : 'pt-2'}`}>
+          <div className={`${
+            isDark ? 'text-gray-400' : 'text-gray-500'
+          } ${shouldUseCompactLayout ? 'text-xs' : 'text-xs'}`}>
             Last update: {lastUpdate.toLocaleTimeString(undefined, {
               hour: '2-digit',
               minute: '2-digit',
@@ -316,9 +232,13 @@ export function StatusPanel({
             })}
           </div>
           <div className={shouldUseCompactLayout ? 'mt-1' : 'mt-1'}>
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1">
+            <div className={`w-full rounded-full h-1 ${
+              isDark ? 'bg-gray-700' : 'bg-gray-200'
+            }`}>
               <div 
-                className="bg-blue-500 dark:bg-blue-400 h-1 rounded-full transition-all duration-1000"
+                className={`h-1 rounded-full transition-all duration-1000 ${
+                  isDark ? 'bg-blue-400' : 'bg-blue-500'
+                }`}
                 style={{ width: `${systemHealth}%` }}
               ></div>
             </div>
@@ -332,16 +252,22 @@ export function StatusPanel({
             : 'grid grid-cols-3 gap-2'
         } ${shouldUseCompactLayout ? 'text-xs' : 'text-xs'}`}>
           <div className="text-center min-w-0">
-            <div className="text-gray-500 dark:text-gray-400 truncate">CPU</div>
-            <div className="text-green-600 dark:text-green-400 font-medium">23%</div>
+            <div className={isDark ? 'text-gray-400' : 'text-gray-500'}>CPU</div>
+            <div className={`font-medium ${
+              isDark ? 'text-green-400' : 'text-green-600'
+            }`}>23%</div>
           </div>
           <div className="text-center min-w-0">
-            <div className="text-gray-500 dark:text-gray-400 truncate">RAM</div>
-            <div className="text-yellow-600 dark:text-yellow-400 font-medium">67%</div>
+            <div className={isDark ? 'text-gray-400' : 'text-gray-500'}>RAM</div>
+            <div className={`font-medium ${
+              isDark ? 'text-yellow-400' : 'text-yellow-600'
+            }`}>67%</div>
           </div>
           <div className="text-center min-w-0">
-            <div className="text-gray-500 dark:text-gray-400 truncate">FPS</div>
-            <div className="text-blue-600 dark:text-blue-400 font-medium">
+            <div className={isDark ? 'text-gray-400' : 'text-gray-500'}>FPS</div>
+            <div className={`font-medium ${
+              isDark ? 'text-blue-400' : 'text-blue-600'
+            }`}>
               {shouldUseCompactLayout ? '60' : '60'}
             </div>
           </div>
@@ -349,7 +275,11 @@ export function StatusPanel({
 
         {/* Mobile-specific additional info */}
         {isMobile && (
-          <div className="flex justify-between items-center pt-2 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400">
+          <div className={`flex justify-between items-center pt-2 border-t text-xs ${
+            isDark 
+              ? 'border-gray-700 text-gray-400' 
+              : 'border-gray-200 text-gray-500'
+          }`}>
             <span>Tap to refresh</span>
             <span>{Math.round(systemHealth)}% operational</span>
           </div>
@@ -358,26 +288,35 @@ export function StatusPanel({
 
       {/* Always visible minimal status bar for collapsed state */}
       {shouldUseCompactLayout && !isExpanded && (
-        <div className="mt-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+        <div className={`mt-2 pt-2 border-t ${
+          isDark ? 'border-gray-700' : 'border-gray-200'
+        }`}>
           <div className="flex justify-between items-center text-xs">
-            <span className={`${
+            <span className={
               connectionStatus === 'connected' 
-                ? 'text-green-600 dark:text-green-400' 
-                : 'text-red-600 dark:text-red-400'
-            }`}>
+                ? isDark ? 'text-green-400' : 'text-green-600'
+                : isDark ? 'text-red-400' : 'text-red-600'
+            }>
               {connectionStatus === 'connected' ? 'Online' : 'Offline'}
             </span>
-            <span className="text-purple-600 dark:text-purple-400">
+            <span className={isDark ? 'text-purple-400' : 'text-purple-600'}>
               {Math.round(systemHealth)}%
             </span>
-            <span className={isUpdating ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500'}>
+            <span className={isUpdating 
+              ? isDark ? 'text-blue-400' : 'text-blue-600'
+              : isDark ? 'text-gray-500' : 'text-gray-500'
+            }>
               {isUpdating ? 'Live' : 'Paused'}
             </span>
           </div>
           <div className="mt-1">
-            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-0.5">
+            <div className={`w-full rounded-full h-0.5 ${
+              isDark ? 'bg-gray-700' : 'bg-gray-200'
+            }`}>
               <div 
-                className="bg-blue-500 dark:bg-blue-400 h-0.5 rounded-full transition-all duration-1000"
+                className={`h-0.5 rounded-full transition-all duration-1000 ${
+                  isDark ? 'bg-blue-400' : 'bg-blue-500'
+                }`}
                 style={{ width: `${systemHealth}%` }}
               ></div>
             </div>

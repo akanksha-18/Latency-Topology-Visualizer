@@ -1,170 +1,7 @@
-// 'use client'
-
-// import { useState } from 'react'
-// import { Search, Filter, Eye, EyeOff, Server, Cloud, Zap } from 'lucide-react'
-// import type { FilterState, ExchangeData } from '../types/index'
-
-// interface ControlPanelProps {
-//   filters: FilterState
-//   onFiltersChange: (filters: FilterState) => void
-//   exchangeData: ExchangeData[]
-//   selectedExchange: ExchangeData | null
-//   onExchangeSelect: (exchange: ExchangeData | null) => void
-// }
-
-// export function ControlPanel({
-//   filters,
-//   onFiltersChange,
-//   exchangeData,
-//   selectedExchange,
-//   onExchangeSelect,
-// }: ControlPanelProps) {
-//   const [searchTerm, setSearchTerm] = useState('')
-//   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
-
-//   const filteredExchanges = exchangeData.filter(exchange =>
-//     exchange.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-//     exchange.location.city.toLowerCase().includes(searchTerm.toLowerCase())
-//   )
-
-//   const handleCloudProviderToggle = (provider: string) => {
-//     const newProviders = filters.cloudProviders.includes(provider)
-//       ? filters.cloudProviders.filter(p => p !== provider)
-//       : [...filters.cloudProviders, provider]
-    
-//     onFiltersChange({ ...filters, cloudProviders: newProviders })
-//   }
-
-//   const handleExchangeToggle = (exchangeName: string) => {
-//     const newExchanges = filters.exchanges.includes(exchangeName)
-//       ? filters.exchanges.filter(e => e !== exchangeName)
-//       : [...filters.exchanges, exchangeName]
-    
-//     onFiltersChange({ ...filters, exchanges: newExchanges })
-//   }
-
-//   return (
-//     <div className="p-6 space-y-6">
-//       <div className="flex items-center justify-between">
-//         <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-//           Exchange Monitor
-//         </h2>
-//         <button
-//           onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-//           className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
-//         >
-//           <Filter className="w-4 h-4" />
-//         </button>
-//       </div>
-
-//       {/* Search */}
-//       <div className="relative">
-//         <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
-//         <input
-//           type="text"
-//           placeholder="Search exchanges or locations..."
-//           value={searchTerm}
-//           onChange={(e) => setSearchTerm(e.target.value)}
-//           className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-cyber-blue focus:border-transparent"
-//         />
-//       </div>
-
-//       {/* Advanced Filters */}
-//       <div>
-//   <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center">
-//     <Cloud className="w-4 h-4 mr-1" />
-//     Cloud Providers
-//   </h3>
-//   <div className="space-y-2">
-//     {['aws', 'gcp', 'azure'].map(provider => (
-//       <label key={provider} className="flex items-center">
-//         <input
-//           type="checkbox"
-//           checked={filters.cloudProviders.includes(provider)}
-//           onChange={() => handleCloudProviderToggle(provider)}
-//           className="mr-2 rounded text-cyber-blue focus:ring-cyber-blue"
-//         />
-//         <span className="text-sm text-gray-600 dark:text-gray-400">{provider.toUpperCase()}</span>
-//       </label>
-//     ))}
-//   </div>
-// </div>
-
-
-//       {/* Exchange List */}
-//       <div>
-//         <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
-//           <Server className="w-4 h-4 mr-1" />
-//           Exchanges ({filteredExchanges.length})
-//         </h3>
-//         <div className="space-y-2 max-h-64 overflow-y-auto">
-//           {filteredExchanges.map(exchange => (
-//             <div
-//               key={exchange.id}
-//               onClick={() => onExchangeSelect(selectedExchange?.id === exchange.id ? null : exchange)}
-//               className={`p-3 rounded-lg border cursor-pointer transition-all ${
-//                 selectedExchange?.id === exchange.id
-//                   ? 'border-cyber-blue bg-cyber-blue/10 cyber-glow'
-//                   : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
-//               }`}
-//             >
-//               <div className="flex items-center justify-between">
-//                 <div>
-//                   <h4 className="font-medium text-gray-900 dark:text-white">
-//                     {exchange.name}
-//                   </h4>
-//                   <p className="text-sm text-gray-500 dark:text-gray-400">
-//                     {exchange.location.city}, {exchange.location.country}
-//                   </p>
-//                 </div>
-//                 <div className="text-right">
-//                   <div className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-//                     exchange.cloudProvider === 'aws' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' :
-//                     exchange.cloudProvider === 'gcp' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-//                     'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
-//                   }`}>
-//                     {exchange.cloudProvider.toUpperCase()}
-//                   </div>
-//                   <div className="flex items-center mt-1 text-xs text-gray-500">
-//                     <Zap className="w-3 h-3 mr-1" />
-//                     <span className={`font-medium ${
-//                       exchange.latency < 50 ? 'text-green-600' :
-//                       exchange.latency < 150 ? 'text-yellow-600' :
-//                       'text-red-600'
-//                     }`}>
-//                       {exchange.latency}ms
-//                     </span>
-//                   </div>
-//                 </div>
-//               </div>
-//             </div>
-//           ))}
-//         </div>
-//       </div>
-
-//       {/* Quick Stats */}
-//       <div className="grid grid-cols-2 gap-4">
-//         <div className="p-3 bg-gradient-to-r from-cyber-blue/20 to-cyber-purple/20 rounded-lg">
-//           <div className="text-sm text-gray-600 dark:text-gray-400">Active Exchanges</div>
-//           <div className="text-2xl font-bold text-gray-900 dark:text-white">{exchangeData.length}</div>
-//         </div>
-//         <div className="p-3 bg-gradient-to-r from-cyber-green/20 to-cyber-blue/20 rounded-lg">
-//           <div className="text-sm text-gray-600 dark:text-gray-400">Avg Latency</div>
-//          <div className="text-2xl font-bold text-gray-900 dark:text-white">
-//   {exchangeData.length > 0
-//     ? `${Math.round(exchangeData.reduce((sum, ex) => sum + ex.latency, 0) / exchangeData.length)}ms`
-//     : 'Loading...'}
-// </div>
-
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
 'use client'
 
-import { useState, useEffect } from 'react'
-import { Search, Filter, Eye, EyeOff, Server, Cloud, Zap } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Search, Filter, Server, Cloud, Zap } from 'lucide-react'
 import type { FilterState, ExchangeData } from '../types/index'
 
 interface ControlPanelProps {
@@ -184,22 +21,44 @@ export function ControlPanel({
 }: ControlPanelProps) {
   const [searchTerm, setSearchTerm] = useState('')
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
-  const [isClient, setIsClient] = useState(false)
+  const [isDark, setIsDark] = useState(false)
 
+  const statsRef = useRef<HTMLDivElement | null>(null)
+
+  // Monitor theme changes
   useEffect(() => {
-    setIsClient(true)
+    const checkTheme = () => {
+      const theme = document.documentElement.getAttribute('data-theme')
+      setIsDark(theme === 'dark')
+    }
+
+    // Initial check
+    checkTheme()
+
+    // Create observer for theme changes
+    const observer = new MutationObserver(checkTheme)
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['data-theme']
+    })
+
+    return () => observer.disconnect()
   }, [])
 
+  // Filter exchange list based on cloud provider + search
   const filteredExchanges = exchangeData.filter(exchange =>
-    exchange.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    exchange.location.city.toLowerCase().includes(searchTerm.toLowerCase())
+    (filters.cloudProviders.length === 0 || filters.cloudProviders.includes(exchange.cloudProvider)) &&
+    (
+      exchange.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      exchange.location.city.toLowerCase().includes(searchTerm.toLowerCase())
+    )
   )
 
   const handleCloudProviderToggle = (provider: 'aws' | 'gcp' | 'azure') => {
     const newProviders = filters.cloudProviders.includes(provider)
       ? filters.cloudProviders.filter(p => p !== provider)
       : [...filters.cloudProviders, provider]
-    
+
     onFiltersChange({ ...filters, cloudProviders: newProviders })
   }
 
@@ -207,31 +66,29 @@ export function ControlPanel({
     const newExchanges = filters.exchanges.includes(exchangeName)
       ? filters.exchanges.filter(e => e !== exchangeName)
       : [...filters.exchanges, exchangeName]
-    
+
     onFiltersChange({ ...filters, exchanges: newExchanges })
   }
 
   return (
-    <div className="p-6 space-y-6">
-      {!isClient ? (
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded"></div>
-          <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
-          <div className="space-y-2">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <>
+    <div className={`p-6 space-y-6 transition-colors duration-300 ${
+      isDark 
+        ? 'bg-gray-900 text-white' 
+        : 'bg-white text-gray-900'
+    }`}>
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+        <h2 className={`text-xl font-bold ${
+          isDark ? 'text-white' : 'text-gray-900'
+        }`}>
           Exchange Monitor
         </h2>
         <button
           onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-          className="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+          className={`p-2 rounded-lg transition-colors ${
+            isDark 
+              ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' 
+              : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+          }`}
         >
           <Filter className="w-4 h-4" />
         </button>
@@ -239,40 +96,66 @@ export function ControlPanel({
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-3 w-4 h-4 text-gray-400" />
+        <Search className={`absolute left-3 top-3 w-4 h-4 ${
+          isDark ? 'text-gray-500' : 'text-gray-400'
+        }`} />
         <input
           type="text"
           placeholder="Search exchanges or locations..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-cyber-blue focus:border-transparent"
+          className={`w-full pl-10 pr-4 py-2 border rounded-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+            isDark 
+              ? 'border-gray-600 bg-gray-800 text-white placeholder-gray-400' 
+              : 'border-gray-200 bg-white text-gray-900 placeholder-gray-500'
+          }`}
         />
       </div>
 
       {/* Advanced Filters */}
-      <div>
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center">
-          <Cloud className="w-4 h-4 mr-1" />
-          Cloud Providers
-        </h3>
-        <div className="space-y-2">
-          {(['aws', 'gcp', 'azure'] as const).map(provider => (
-            <label key={provider} className="flex items-center">
-              <input
-                type="checkbox"
-                checked={filters.cloudProviders.includes(provider)}
-                onChange={() => handleCloudProviderToggle(provider)}
-                className="mr-2 rounded text-cyber-blue focus:ring-cyber-blue"
-              />
-              <span className="text-sm text-gray-600 dark:text-gray-400">{provider.toUpperCase()}</span>
-            </label>
-          ))}
+      {showAdvancedFilters && (
+        <div className={`p-4 rounded-lg border transition-colors ${
+          isDark 
+            ? 'bg-gray-800 border-gray-700' 
+            : 'bg-gray-50 border-gray-200'
+        }`}>
+          <h3 className={`text-sm font-semibold mb-2 flex items-center ${
+            isDark ? 'text-gray-300' : 'text-gray-700'
+          }`}>
+            <Cloud className="w-4 h-4 mr-1" />
+            Cloud Providers
+          </h3>
+          <div className="space-y-2">
+            {(['aws', 'gcp', 'azure'] as const).map(provider => (
+              <label key={provider} className="flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={filters.cloudProviders.includes(provider)}
+                  onChange={() => handleCloudProviderToggle(provider)}
+                  className={`mr-2 rounded text-blue-600 focus:ring-blue-500 ${
+                    isDark 
+                      ? 'bg-gray-700 border-gray-600' 
+                      : 'bg-white border-gray-300'
+                  }`}
+                />
+                <span className={`text-sm transition-colors ${
+                  isDark 
+                    ? 'text-gray-400 hover:text-gray-200' 
+                    : 'text-gray-600 hover:text-gray-800'
+                }`}>
+                  {provider.toUpperCase()}
+                </span>
+              </label>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Exchange List */}
       <div>
-        <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
+        <h3 className={`text-sm font-semibold mb-3 flex items-center ${
+          isDark ? 'text-gray-300' : 'text-gray-700'
+        }`}>
           <Server className="w-4 h-4 mr-1" />
           Exchanges ({filteredExchanges.length})
         </h3>
@@ -280,36 +163,62 @@ export function ControlPanel({
           {filteredExchanges.map(exchange => (
             <div
               key={exchange.id}
-              onClick={() => onExchangeSelect(selectedExchange?.id === exchange.id ? null : exchange)}
+              onClick={() => {
+                const isSame = selectedExchange?.id === exchange.id
+                onExchangeSelect(isSame ? null : exchange)
+                if (!isSame && statsRef.current) {
+                  statsRef.current.scrollIntoView({ behavior: 'smooth' })
+                }
+              }}
               className={`p-3 rounded-lg border cursor-pointer transition-all ${
                 selectedExchange?.id === exchange.id
-                  ? 'border-cyber-blue bg-cyber-blue/10 cyber-glow'
-                  : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                  ? isDark 
+                    ? 'border-blue-400 bg-blue-900/20 shadow-lg cyber-glow'
+                    : 'border-blue-500 bg-blue-50 shadow-lg cyber-glow'
+                  : isDark 
+                    ? 'border-gray-700 bg-gray-800 hover:border-gray-600 hover:bg-gray-750'
+                    : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
               }`}
             >
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-medium text-gray-900 dark:text-white">
+                  <h4 className={`font-medium ${
+                    isDark ? 'text-white' : 'text-gray-900'
+                  }`}>
                     {exchange.name}
                   </h4>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                  <p className={`text-sm ${
+                    isDark ? 'text-gray-400' : 'text-gray-500'
+                  }`}>
                     {exchange.location.city}, {exchange.location.country}
                   </p>
                 </div>
                 <div className="text-right">
                   <div className={`inline-block px-2 py-1 rounded text-xs font-medium ${
-                    exchange.cloudProvider === 'aws' ? 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200' :
-                    exchange.cloudProvider === 'gcp' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                    'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200'
+                    exchange.cloudProvider === 'aws' 
+                      ? isDark 
+                        ? 'bg-orange-900/50 text-orange-200' 
+                        : 'bg-orange-100 text-orange-800'
+                      : exchange.cloudProvider === 'gcp' 
+                        ? isDark 
+                          ? 'bg-blue-900/50 text-blue-200' 
+                          : 'bg-blue-100 text-blue-800'
+                        : isDark 
+                          ? 'bg-purple-900/50 text-purple-200' 
+                          : 'bg-purple-100 text-purple-800'
                   }`}>
                     {exchange.cloudProvider.toUpperCase()}
                   </div>
-                  <div className="flex items-center mt-1 text-xs text-gray-500">
+                  <div className={`flex items-center mt-1 text-xs ${
+                    isDark ? 'text-gray-400' : 'text-gray-500'
+                  }`}>
                     <Zap className="w-3 h-3 mr-1" />
                     <span className={`font-medium ${
-                      exchange.latency < 50 ? 'text-green-600' :
-                      exchange.latency < 150 ? 'text-yellow-600' :
-                      'text-red-600'
+                      exchange.latency < 50 
+                        ? isDark ? 'text-green-400' : 'text-green-600'
+                        : exchange.latency < 150 
+                          ? isDark ? 'text-yellow-400' : 'text-yellow-600'
+                          : isDark ? 'text-red-400' : 'text-red-600'
                     }`}>
                       {exchange.latency}ms
                     </span>
@@ -322,23 +231,36 @@ export function ControlPanel({
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 gap-4">
-        <div className="p-3 bg-gradient-to-r from-cyber-blue/20 to-cyber-purple/20 rounded-lg">
-          <div className="text-sm text-gray-600 dark:text-gray-400">Active Exchanges</div>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">{exchangeData.length}</div>
+      <div ref={statsRef} className="grid grid-cols-2 gap-4">
+        <div className={`p-3 rounded-lg border transition-colors ${
+          isDark 
+            ? 'bg-gradient-to-r from-blue-900/30 to-purple-900/30 border-gray-700' 
+            : 'bg-gradient-to-r from-blue-100 to-purple-100 border-gray-200'
+        }`}>
+          <div className={`text-sm ${
+            isDark ? 'text-gray-400' : 'text-gray-600'
+          }`}>Active Exchanges</div>
+          <div className={`text-2xl font-bold ${
+            isDark ? 'text-white' : 'text-gray-900'
+          }`}>{filteredExchanges.length}</div>
         </div>
-        <div className="p-3 bg-gradient-to-r from-cyber-green/20 to-cyber-blue/20 rounded-lg">
-          <div className="text-sm text-gray-600 dark:text-gray-400">Avg Latency</div>
-         <div className="text-2xl font-bold text-gray-900 dark:text-white">
-  {exchangeData.length > 0
-    ? `${Math.round(exchangeData.reduce((sum, ex) => sum + ex.latency, 0) / exchangeData.length)}ms`
-    : 'Loading...'}
-</div>
-
+        <div className={`p-3 rounded-lg border transition-colors ${
+          isDark 
+            ? 'bg-gradient-to-r from-green-900/30 to-blue-900/30 border-gray-700' 
+            : 'bg-gradient-to-r from-green-100 to-blue-100 border-gray-200'
+        }`}>
+          <div className={`text-sm ${
+            isDark ? 'text-gray-400' : 'text-gray-600'
+          }`}>Avg Latency</div>
+          <div className={`text-2xl font-bold ${
+            isDark ? 'text-white' : 'text-gray-900'
+          }`}>
+            {filteredExchanges.length > 0
+              ? `${Math.round(filteredExchanges.reduce((sum, ex) => sum + ex.latency, 0) / filteredExchanges.length)}ms`
+              : 'N/A'}
+          </div>
         </div>
       </div>
-        </>
-      )}
     </div>
   )
 }
