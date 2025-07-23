@@ -256,7 +256,8 @@ export function LatencyChart({
                   fontSize: windowWidth < 640 ? 11 : 13, 
                   fill: isDark ? '#9ca3af' : '#6b7280' 
                 }}
-                interval={windowWidth < 640 ? 'preserveStartEnd' : 'auto'}
+                interval={windowWidth < 640 ? 0 : undefined}
+
                 angle={windowWidth < 640 ? -35 : 0}
                 textAnchor={windowWidth < 640 ? 'end' : 'middle'}
                 height={windowWidth < 640 ? 60 : 40}
