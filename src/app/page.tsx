@@ -100,7 +100,7 @@ export default function HomePage()  {
                 <div className="p-4 border-t border-gray-200 dark:border-gray-700">
                   <LatencyChart
                     exchangeData={selectedExchange}
-                    latencyData={latencyData}
+                   
                     timeRange="24h"
                   />
                 </div>
@@ -126,7 +126,7 @@ export default function HomePage()  {
             <div className="h-32">
               <LatencyChart
                 exchangeData={selectedExchange}
-                latencyData={latencyData}
+                
                 timeRange="24h"
               />
             </div>
@@ -160,7 +160,6 @@ export default function HomePage()  {
             <div className="p-4 border-t border-gray-200 dark:border-gray-700">
               <LatencyChart
                 exchangeData={selectedExchange}
-                latencyData={latencyData}
                 timeRange="24h"
               />
             </div>
