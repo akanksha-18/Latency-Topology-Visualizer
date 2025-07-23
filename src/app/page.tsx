@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Globe3D from '../components/Global3D'
 import { ControlPanel } from '../components/ControlPanel'
-import { LatencyChart } from '../components/LatencyChart'
+import  {LatencyChart}  from '../components/LatencyChart'
 import { StatusPanel } from '../components/StatusPanel'
 import { LoadingScreen } from '../components/LoadingScreen'
 import { useLatencyData } from '../hooks/useLatencyData'
@@ -97,7 +97,7 @@ export default function HomePage()  {
                 onExchangeSelect={setSelectedExchange}
               />
               {selectedExchange && (
-                <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+                <div className="py-4 border-t border-gray-200 dark:border-gray-700">
                   <LatencyChart
                     exchangeData={selectedExchange}
                    
@@ -157,7 +157,7 @@ export default function HomePage()  {
             onExchangeSelect={setSelectedExchange}
           />
           {selectedExchange && (
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+            <div className="border-t border-gray-200 dark:border-gray-700">
               <LatencyChart
                 exchangeData={selectedExchange}
                 timeRange="24h"

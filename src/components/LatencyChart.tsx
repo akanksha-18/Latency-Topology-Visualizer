@@ -1,4 +1,5 @@
 
+
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -147,7 +148,7 @@ export function LatencyChart({
   const previousLatency = chartData.at(-2)?.latency || exchangeData.latency
   const trend = currentLatency - previousLatency
   const avgLatency = Math.round(chartData.reduce((sum, d) => sum + d.latency, 0) / chartData.length)
-  const minLatency = Math.min(...chartData.map(d => d.latency))
+  // const minLatency = Math.min(...chartData.map(d => d.latency))
   const maxLatency = Math.max(...chartData.map(d => d.latency))
 
   // Calculate Y-axis domain with proper padding
@@ -178,129 +179,124 @@ export function LatencyChart({
   const timeRangeOptions: TimeRange[] = ['1h', '24h', '7d', '30d']
 
   return (
-    <div className="w-full flex justify-center px-1 sm:px-2">
-      <div className={`w-full max-w-none space-y-4 sm:space-y-6 transition-colors duration-300 ${
-        isDark ? 'bg-gray-900' : 'bg-white'
-      } p-4 sm:p-6 lg:p-8 rounded-lg ${
-        isDark ? 'border border-gray-700' : 'border border-gray-200'
-      }`}>
+    <div className={`p-6 space-y-4  transition-colors duration-300 ${
+      isDark ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'
+    }`}>
 
-        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-            <h3 className={`font-semibold text-lg md:text-xl ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              {exchangeData.name} Latency
-            </h3>
-            <div className="flex items-center gap-2 text-sm">
-              <span className={`w-2.5 h-2.5 rounded-full ${
-                networkQuality === 'excellent' ? 'bg-green-500' :
-                networkQuality === 'good' ? 'bg-blue-500' :
-                networkQuality === 'fair' ? 'bg-yellow-500' :
-                networkQuality === 'poor' ? 'bg-orange-500' : 'bg-red-500'
-              }`} />
-              <span className={`capitalize font-medium ${getQualityColor()}`}>
-                {networkQuality.replace('-', ' ')}
-              </span>
-            </div>
-          </div>
-          <div className="flex gap-2 flex-wrap justify-end">
-            {timeRangeOptions.map(range => (
-              <button
-                key={range}
-                onClick={() => setSelectedTimeRange(range)}
-                className={`py-1.5 px-3 text-sm rounded-md transition-all font-medium ${
-                  selectedTimeRange === range
-                    ? 'bg-cyan-500 text-white shadow-lg'
-                    : isDark
-                      ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                {range.toUpperCase()}
-              </button>
-            ))}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+          <h3 className={`font-semibold text-base md:text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            {exchangeData.name} Latency
+          </h3>
+          <div className="flex items-center gap-2 text-sm">
+            <span className={`w-2.5 h-2.5 rounded-full ${
+              networkQuality === 'excellent' ? 'bg-green-500' :
+              networkQuality === 'good' ? 'bg-blue-500' :
+              networkQuality === 'fair' ? 'bg-yellow-500' :
+              networkQuality === 'poor' ? 'bg-orange-500' : 'bg-red-500'
+            }`} />
+            <span className={`capitalize font-medium ${getQualityColor()}`}>
+              {networkQuality.replace('-', ' ')}
+            </span>
           </div>
         </div>
-
-        <div className="grid grid-cols-2 gap-6">
-          <LatencyStat label="Current" value={currentLatency} trend={trend} isDark={isDark} />
-          <LatencyStat label="Average" value={avgLatency} isDark={isDark} />
-          <LatencyStat label="Min" value={minLatency} isDark={isDark} />
-          <LatencyStat label="Max" value={maxLatency} isDark={isDark} />
-        </div>
-
-        <div className="h-64 md:h-64 lg:h-64 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart 
-              data={chartData}
-              margin={{ 
-                top: 20, 
-                right: windowWidth < 640 ? 20 : 40, 
-                left: windowWidth < 640 ? 5 : 10, 
-                bottom: 30 
-              }}
+        <div className="flex gap-2 flex-wrap justify-end">
+          {timeRangeOptions.map(range => (
+            <button
+              key={range}
+              onClick={() => setSelectedTimeRange(range)}
+              className={`py-1.5 px-3 text-sm rounded-md transition-all font-medium ${
+                selectedTimeRange === range
+                  ? 'bg-cyan-500 text-white shadow-lg'
+                  : isDark
+                    ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
             >
-              <defs>
-                <linearGradient id="latencyGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#00f5ff" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#00f5ff" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid 
-                strokeDasharray="3 3" 
-                stroke={isDark ? '#374151' : '#e5e7eb'} 
-                opacity={0.3} 
-              />
-              <XAxis 
-                dataKey="time" 
-                tick={{ 
-                  fontSize: windowWidth < 640 ? 11 : 13, 
-                  fill: isDark ? '#9ca3af' : '#6b7280' 
-                }}
-                interval={windowWidth < 640 ? 0 : undefined}
-
-                angle={windowWidth < 640 ? -35 : 0}
-                textAnchor={windowWidth < 640 ? 'end' : 'middle'}
-                height={windowWidth < 640 ? 60 : 40}
-              />
-              <YAxis 
-                tick={{ 
-                  fontSize: windowWidth < 640 ? 11 : 13, 
-                  fill: isDark ? '#9ca3af' : '#6b7280' 
-                }}
-                domain={[yAxisMin, yAxisMax]}
-                tickCount={getTickCount()}
-                width={windowWidth < 640 ? 45 : 55}
-                tickFormatter={(value) => `${Math.round(value)}ms`}
-              />
-              <Tooltip 
-                contentStyle={{
-                  backgroundColor: isDark ? '#1f2937' : '#ffffff',
-                  border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
-                  borderRadius: '6px',
-                  color: isDark ? '#f9fafb' : '#111827'
-                }}
-                formatter={(value: number) => [`${value}ms`, 'Latency']}
-                labelStyle={{ color: isDark ? '#9ca3af' : '#6b7280' }}
-              />
-              <Area 
-                type="monotone" 
-                dataKey="latency" 
-                stroke="#00f5ff" 
-                strokeWidth={2} 
-                fill="url(#latencyGradient)"
-                dot={false}
-                activeDot={{ r: 4, fill: '#00f5ff' }}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+              {range.toUpperCase()}
+            </button>
+          ))}
         </div>
-
-        <p className={`text-sm text-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-          {exchangeEndpoints[exchangeData.id.toLowerCase() as keyof typeof exchangeEndpoints]
-            ? `Measuring latency to ${exchangeData.name} API`
-            : 'Measuring network latency with fallback endpoints'}
-        </p>
       </div>
+
+      <div className="grid grid-cols-3 gap-3">
+        <LatencyStat label="Current" value={currentLatency} trend={trend} isDark={isDark} />
+        <LatencyStat label="Average" value={avgLatency} isDark={isDark} />
+        <LatencyStat label="Max" value={maxLatency} isDark={isDark} />
+      </div>
+
+      <div className="h-64 md:h-64 lg:h-64 w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart 
+            data={chartData}
+            margin={{ 
+              top: 20, 
+              right: windowWidth < 640 ? 20 : 40, 
+              left: windowWidth < 640 ? 5 : 10, 
+              bottom: 30 
+            }}
+          >
+            <defs>
+              <linearGradient id="latencyGradient" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#00f5ff" stopOpacity={0.3} />
+                <stop offset="95%" stopColor="#00f5ff" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid 
+              strokeDasharray="3 3" 
+              stroke={isDark ? '#374151' : '#e5e7eb'} 
+              opacity={0.3} 
+            />
+            <XAxis 
+              dataKey="time" 
+              tick={{ 
+                fontSize: windowWidth < 640 ? 11 : 13, 
+                fill: isDark ? '#9ca3af' : '#6b7280' 
+              }}
+              interval={windowWidth < 640 ? 0 : undefined}
+
+              angle={windowWidth < 640 ? -35 : 0}
+              textAnchor={windowWidth < 640 ? 'end' : 'middle'}
+              height={windowWidth < 640 ? 60 : 40}
+            />
+            <YAxis 
+              tick={{ 
+                fontSize: windowWidth < 640 ? 11 : 13, 
+                fill: isDark ? '#9ca3af' : '#6b7280' 
+              }}
+              domain={[yAxisMin, yAxisMax]}
+              tickCount={getTickCount()}
+              width={windowWidth < 640 ? 45 : 55}
+              tickFormatter={(value) => `${Math.round(value)}ms`}
+            />
+            <Tooltip 
+              contentStyle={{
+                backgroundColor: isDark ? '#1f2937' : '#ffffff',
+                border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
+                borderRadius: '6px',
+                color: isDark ? '#f9fafb' : '#111827'
+              }}
+              formatter={(value: number) => [`${value}ms`, 'Latency']}
+              labelStyle={{ color: isDark ? '#9ca3af' : '#6b7280' }}
+            />
+            <Area 
+              type="monotone" 
+              dataKey="latency" 
+              stroke="#00f5ff" 
+              strokeWidth={2} 
+              fill="url(#latencyGradient)"
+              dot={false}
+              activeDot={{ r: 4, fill: '#00f5ff' }}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+
+      <p className={`text-sm text-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+        {exchangeEndpoints[exchangeData.id.toLowerCase() as keyof typeof exchangeEndpoints]
+          ? `Measuring latency to ${exchangeData.name} API`
+          : 'Measuring network latency with fallback endpoints'}
+      </p>
     </div>
   )
 }
@@ -323,11 +319,11 @@ function LatencyStat({
   }
 
   return (
-    <div className={`p-4 rounded-lg ${
+    <div className={`p-3 rounded-lg ${
       isDark ? 'bg-gray-800 border border-gray-700' : 'bg-gray-50 border border-gray-200'
-    } flex flex-col justify-center min-h-[80px]`}>
-      <div className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'} mb-1`}>{label}</div>
-      <div className={`text-xl md:text-2xl font-bold ${getValueColor()} mb-1`}>{value}ms</div>
+    } flex flex-col justify-center min-h-[60px]`}>
+      <div className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'} mb-1`}>{label}</div>
+      <div className={`text-sm md:text-base font-bold ${getValueColor()} mb-1`}>{value}ms</div>
       {typeof trend === 'number' && (
         <div className="flex items-center text-sm">
           {trend > 0 ? (
