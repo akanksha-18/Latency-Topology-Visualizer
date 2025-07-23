@@ -110,27 +110,40 @@ export default function HomePage()  {
         )}
 
         {selectedExchange && !isSidePanelOpen && (
-          <div className="bg-white dark:bg-dark-surface border-t border-gray-200 dark:border-gray-700 p-3 max-h-64 overflow-hidden">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium truncate">{selectedExchange.name}</h3>
-              <button
-                onClick={() => setSelectedExchange(null)}
-                className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 ml-2"
-                aria-label="Close chart"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="h-32">
-              <LatencyChart
-                exchangeData={selectedExchange}
+          // <div className="bg-white dark:bg-dark-surface border-t border-gray-200 dark:border-gray-700 p-3 max-h-64 overflow-hidden">
+          //   <div className="flex items-center justify-between mb-2">
+          //     <h3 className="text-sm font-medium truncate">{selectedExchange.name}</h3>
+          //     <button
+          //       onClick={() => setSelectedExchange(null)}
+          //       className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 ml-2"
+          //       aria-label="Close chart"
+          //     >
+          //       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          //         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          //       </svg>
+          //     </button>
+          //   </div>
+          //   <div className="h-32">
+          //     <LatencyChart
+          //       exchangeData={selectedExchange}
                 
-                timeRange="24h"
-              />
-            </div>
-          </div>
+          //       timeRange="24h"
+          //     />
+          //   </div>
+          // </div>
+          <div className="bg-white dark:bg-dark-surface border-b border-gray-200 dark:border-gray-700 p-3 flex items-center justify-between z-20 relative">
+  <button
+    onClick={() => setIsSidePanelOpen(true)}
+    className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+    aria-label="Open control panel"
+  >
+    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  </button>
+  <StatusPanel isUpdating={isUpdating} theme={theme} onToggleTheme={toggleTheme} />
+</div>
+
         )}
       </div>
 
