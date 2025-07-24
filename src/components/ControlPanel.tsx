@@ -344,23 +344,24 @@ export function ControlPanel({
         : 'bg-white text-gray-900'
     }`}>
       <div className="flex items-center justify-between gap-3">
-        <h2 className={`text-lg sm:text-xl font-bold truncate ${
-          isDark ? 'text-white' : 'text-gray-900'
-        }`}>
-          Exchange Monitor
-        </h2>
-        <button
-          onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-          className={`flex-shrink-0 p-2 rounded-lg transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center ${
-            isDark 
-              ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' 
-              : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
-          }`}
-        >
-          <Filter className="w-4 h-4" />
-        </button>
-      </div>
-
+  <h2 className={`text-lg sm:text-xl font-extrabold tracking-tight truncate bg-gradient-to-r bg-clip-text text-transparent ${
+    isDark 
+      ? 'from-purple-400 via-pink-300 to-blue-300' 
+      : 'from-purple-600 via-pink-600 to-blue-600'
+  }`}>
+    Exchange Monitor
+  </h2>
+  <button
+    onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+    className={`flex-shrink-0 p-2 rounded-lg transition-all duration-200 min-w-[40px] min-h-[40px] flex items-center justify-center shadow-md hover:shadow-lg transform hover:scale-105 ${
+      isDark
+        ? 'bg-gradient-to-r from-gray-700 to-gray-600 hover:from-gray-600 hover:to-gray-500 text-white border border-gray-600'
+        : 'bg-gradient-to-r from-white to-gray-50 hover:from-gray-50 hover:to-gray-100 text-gray-800 border border-gray-200'
+    }`}
+  >
+    <Filter className="w-4 h-4" />
+  </button>
+</div>
       {/* Search */}
       <div className="relative">
         <Search className={`absolute left-3 top-3 w-4 h-4 ${

@@ -1865,7 +1865,7 @@ export default function Global3D({
       )}
 
       {/* Mobile Legend Panel - Collapsible */}
-      {isMobile && (
+      {/* {isMobile && (
         <div className={`absolute ${isFullscreen ? 'top-2 right-2' : 'top-4 right-4'} z-20`}>
           {!showLegend ? (
             <button
@@ -1928,7 +1928,56 @@ export default function Global3D({
             </div>
           )}
         </div>
-      )}
+      )} */}
+
+    {/* Mobile Legend Panel - Always Visible */}
+{isMobile && (
+  <div className={`absolute ${isFullscreen ? 'top-2 right-2' : 'top-4 right-4'} z-20`}>
+    <div className="bg-black/90 backdrop-blur-md rounded-lg p-3 text-white text-xs max-w-xs">
+      <h4 className="font-bold text-purple-400 mb-2">Legend</h4>
+      
+      <div className="space-y-2">
+        <div>
+          <div className="font-semibold mb-1 text-blue-400">Cloud Providers</div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+              <span>AWS</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+              <span>Azure</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-cyan-400"></div>
+              <span>GCP</span>
+            </div>
+          </div>
+        </div>
+        
+        {showLatency && (
+          <div>
+            <div className="font-semibold mb-1 text-blue-400">Latency</div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-0.5 bg-green-500"></div>
+                <span>{'<50ms'}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-0.5 bg-yellow-500"></div>
+                <span>50-150ms</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-0.5 bg-red-500"></div>
+                <span>{'>150ms'}</span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  </div>
+)}
 
       {/* Desktop Legend */}
       {!isMobile && (
