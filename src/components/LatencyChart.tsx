@@ -1,5 +1,3 @@
-
-
 'use client'
 
 import { useState, useEffect } from 'react'
@@ -148,7 +146,6 @@ export function LatencyChart({
   const previousLatency = chartData.at(-2)?.latency || exchangeData.latency
   const trend = currentLatency - previousLatency
   const avgLatency = Math.round(chartData.reduce((sum, d) => sum + d.latency, 0) / chartData.length)
-  // const minLatency = Math.min(...chartData.map(d => d.latency))
   const maxLatency = Math.max(...chartData.map(d => d.latency))
 
   // Calculate Y-axis domain with proper padding
@@ -159,11 +156,31 @@ export function LatencyChart({
   const yAxisMin = Math.max(0, dataMin - padding)
   const yAxisMax = dataMax + padding
 
+  // Enhanced responsive settings
+  const isMobile = windowWidth < 640
+  const isTablet = windowWidth >= 640 && windowWidth < 1024
+  const isDesktop = windowWidth >= 1024
+
   // Calculate tick count based on screen size and range
   const getTickCount = () => {
-    if (windowWidth < 640) return 4 
-    if (windowWidth < 1024) return 6 // Tablet
-    return 8 // Desktop
+    if (isMobile) return 3
+    if (isTablet) return 5
+    return 7
+  }
+
+  // Get appropriate interval for X-axis labels
+  const getXAxisInterval = () => {
+    const dataLength = chartData.length
+    if (isMobile) {
+      if (dataLength <= 10) return 0
+      if (dataLength <= 30) return Math.floor(dataLength / 4)
+      return Math.floor(dataLength / 3)
+    }
+    if (isTablet) {
+      if (dataLength <= 20) return 0
+      return Math.floor(dataLength / 6)
+    }
+    return 'preserveStartEnd'
   }
 
   const getQualityColor = () => {
@@ -179,33 +196,38 @@ export function LatencyChart({
   const timeRangeOptions: TimeRange[] = ['1h', '24h', '7d', '30d']
 
   return (
-    <div className={`p-6 space-y-4  transition-colors duration-300 ${
+    <div className={`p-3 sm:p-4 lg:p-6 space-y-3 sm:space-y-4 transition-colors duration-300 ${
       isDark ? 'bg-gray-900 text-white' : 'bg-white text-gray-900'
     }`}>
 
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
-        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-          <h3 className={`font-semibold text-base md:text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            {exchangeData.name} Latency
-          </h3>
-          <div className="flex items-center gap-2 text-sm">
-            <span className={`w-2.5 h-2.5 rounded-full ${
-              networkQuality === 'excellent' ? 'bg-green-500' :
-              networkQuality === 'good' ? 'bg-blue-500' :
-              networkQuality === 'fair' ? 'bg-yellow-500' :
-              networkQuality === 'poor' ? 'bg-orange-500' : 'bg-red-500'
-            }`} />
-            <span className={`capitalize font-medium ${getQualityColor()}`}>
-              {networkQuality.replace('-', ' ')}
-            </span>
+      {/* Header Section - Mobile Optimized */}
+      <div className="flex flex-col gap-3">
+        <div className="flex flex-col xs:flex-row xs:justify-between xs:items-start gap-2">
+          <div className="flex flex-col gap-2">
+            <h3 className={`font-semibold text-sm sm:text-base lg:text-lg ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              {exchangeData.name} Latency
+            </h3>
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
+              <span className={`w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full ${
+                networkQuality === 'excellent' ? 'bg-green-500' :
+                networkQuality === 'good' ? 'bg-blue-500' :
+                networkQuality === 'fair' ? 'bg-yellow-500' :
+                networkQuality === 'poor' ? 'bg-orange-500' : 'bg-red-500'
+              }`} />
+              <span className={`capitalize font-medium ${getQualityColor()}`}>
+                {networkQuality.replace('-', ' ')}
+              </span>
+            </div>
           </div>
         </div>
-        <div className="flex gap-2 flex-wrap justify-end">
+        
+        {/* Time Range Buttons - Mobile Optimized */}
+        <div className="flex gap-1 sm:gap-2 overflow-x-auto scrollbar-hide">
           {timeRangeOptions.map(range => (
             <button
               key={range}
               onClick={() => setSelectedTimeRange(range)}
-              className={`py-1.5 px-3 text-sm rounded-md transition-all font-medium ${
+              className={`py-1.5 px-2 sm:px-3 text-xs sm:text-sm rounded-md transition-all font-medium whitespace-nowrap flex-shrink-0 ${
                 selectedTimeRange === range
                   ? 'bg-cyan-500 text-white shadow-lg'
                   : isDark
@@ -219,21 +241,23 @@ export function LatencyChart({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
-        <LatencyStat label="Current" value={currentLatency} trend={trend} isDark={isDark} />
-        <LatencyStat label="Average" value={avgLatency} isDark={isDark} />
-        <LatencyStat label="Max" value={maxLatency} isDark={isDark} />
+      {/* Stats Grid - Mobile Optimized */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        <LatencyStat label="Current" value={currentLatency} trend={trend} isDark={isDark} isMobile={isMobile} />
+        <LatencyStat label="Average" value={avgLatency} isDark={isDark} isMobile={isMobile} />
+        <LatencyStat label="Max" value={maxLatency} isDark={isDark} isMobile={isMobile} />
       </div>
 
-      <div className="h-64 md:h-64 lg:h-64 w-full">
+      {/* Chart Container - Mobile Optimized */}
+      <div className="h-48 sm:h-56 md:h-64 lg:h-72 w-full">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart 
             data={chartData}
             margin={{ 
-              top: 20, 
-              right: windowWidth < 640 ? 20 : 40, 
-              left: windowWidth < 640 ? 5 : 10, 
-              bottom: 30 
+              top: isMobile ? 10 : 20, 
+              right: isMobile ? 10 : isTablet ? 20 : 30, 
+              left: isMobile ? 0 : 5, 
+              bottom: isMobile ? 45 : isTablet ? 35 : 30 
             }}
           >
             <defs>
@@ -245,54 +269,63 @@ export function LatencyChart({
             <CartesianGrid 
               strokeDasharray="3 3" 
               stroke={isDark ? '#374151' : '#e5e7eb'} 
-              opacity={0.3} 
+              opacity={isMobile ? 0.2 : 0.3} 
             />
             <XAxis 
               dataKey="time" 
               tick={{ 
-                fontSize: windowWidth < 640 ? 11 : 13, 
+                fontSize: isMobile ? 10 : isTablet ? 11 : 12, 
                 fill: isDark ? '#9ca3af' : '#6b7280' 
               }}
-              interval={windowWidth < 640 ? 0 : undefined}
-
-              angle={windowWidth < 640 ? -35 : 0}
-              textAnchor={windowWidth < 640 ? 'end' : 'middle'}
-              height={windowWidth < 640 ? 60 : 40}
+              interval={getXAxisInterval()}
+              angle={isMobile ? -45 : isTablet ? -30 : 0}
+              textAnchor={isMobile || isTablet ? 'end' : 'middle'}
+              height={isMobile ? 50 : isTablet ? 45 : 40}
+              axisLine={!isMobile}
+              tickLine={!isMobile}
             />
             <YAxis 
               tick={{ 
-                fontSize: windowWidth < 640 ? 11 : 13, 
+                fontSize: isMobile ? 9 : isTablet ? 10 : 11, 
                 fill: isDark ? '#9ca3af' : '#6b7280' 
               }}
               domain={[yAxisMin, yAxisMax]}
               tickCount={getTickCount()}
-              width={windowWidth < 640 ? 45 : 55}
-              tickFormatter={(value) => `${Math.round(value)}ms`}
+              width={isMobile ? 35 : isTablet ? 45 : 50}
+              tickFormatter={(value) => isMobile ? `${Math.round(value)}` : `${Math.round(value)}ms`}
+              axisLine={!isMobile}
+              tickLine={!isMobile}
             />
             <Tooltip 
               contentStyle={{
                 backgroundColor: isDark ? '#1f2937' : '#ffffff',
                 border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
                 borderRadius: '6px',
-                color: isDark ? '#f9fafb' : '#111827'
+                color: isDark ? '#f9fafb' : '#111827',
+                fontSize: isMobile ? '12px' : '14px',
+                padding: isMobile ? '6px 8px' : '8px 12px'
               }}
               formatter={(value: number) => [`${value}ms`, 'Latency']}
-              labelStyle={{ color: isDark ? '#9ca3af' : '#6b7280' }}
+              labelStyle={{ 
+                color: isDark ? '#9ca3af' : '#6b7280',
+                fontSize: isMobile ? '11px' : '13px'
+              }}
             />
             <Area 
               type="monotone" 
               dataKey="latency" 
               stroke="#00f5ff" 
-              strokeWidth={2} 
+              strokeWidth={isMobile ? 1.5 : 2} 
               fill="url(#latencyGradient)"
               dot={false}
-              activeDot={{ r: 4, fill: '#00f5ff' }}
+              activeDot={{ r: isMobile ? 3 : 4, fill: '#00f5ff' }}
             />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
-      <p className={`text-sm text-center ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+      {/* Footer Text - Mobile Optimized */}
+      <p className={`text-xs sm:text-sm text-center px-2 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
         {exchangeEndpoints[exchangeData.id.toLowerCase() as keyof typeof exchangeEndpoints]
           ? `Measuring latency to ${exchangeData.name} API`
           : 'Measuring network latency with fallback endpoints'}
@@ -305,12 +338,14 @@ function LatencyStat({
   label,
   value,
   trend,
-  isDark
+  isDark,
+  isMobile
 }: {
   label: string
   value: number
   trend?: number
   isDark: boolean
+  isMobile?: boolean
 }) {
   const getValueColor = () => {
     if (label === 'Max') return isDark ? 'text-red-400' : 'text-red-600'
@@ -319,17 +354,21 @@ function LatencyStat({
   }
 
   return (
-    <div className={`p-3 rounded-lg ${
+    <div className={`p-2 sm:p-3 rounded-lg ${
       isDark ? 'bg-gray-800 border border-gray-700' : 'bg-gray-50 border border-gray-200'
-    } flex flex-col justify-center min-h-[60px]`}>
-      <div className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'} mb-1`}>{label}</div>
-      <div className={`text-sm md:text-base font-bold ${getValueColor()} mb-1`}>{value}ms</div>
+    } flex flex-col justify-center min-h-[50px] sm:min-h-[60px]`}>
+      <div className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'} mb-1 leading-tight`}>
+        {label}
+      </div>
+      <div className={`text-xs sm:text-sm lg:text-base font-bold ${getValueColor()} mb-1`}>
+        {isMobile ? `${value}ms` : `${value}ms`}
+      </div>
       {typeof trend === 'number' && (
-        <div className="flex items-center text-sm">
+        <div className="flex items-center text-xs">
           {trend > 0 ? (
-            <TrendingUp className={`w-4 h-4 mr-1 ${isDark ? 'text-red-400' : 'text-red-500'}`} />
+            <TrendingUp className={`w-3 h-3 sm:w-4 sm:h-4 mr-1 ${isDark ? 'text-red-400' : 'text-red-500'}`} />
           ) : (
-            <TrendingDown className={`w-4 h-4 mr-1 ${isDark ? 'text-green-400' : 'text-green-500'}`} />
+            <TrendingDown className={`w-3 h-3 sm:w-4 sm:h-4 mr-1 ${isDark ? 'text-green-400' : 'text-green-500'}`} />
           )}
           <span className={trend > 0 ? (isDark ? 'text-red-400' : 'text-red-500') : (isDark ? 'text-green-400' : 'text-green-500')}>
             {Math.abs(trend)}ms
