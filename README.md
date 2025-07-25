@@ -2,7 +2,7 @@
 
 A real-time network latency monitoring and visualization tool built with Next.js, TypeScript, Three.js, and Tailwind CSS. Monitor cryptocurrency exchange connections worldwide and visualize network performance on an interactive 3D globe with real-time latency topology mapping.
 
-[Live Demo]()
+[Live Demo](https://latency-topology-visualizer-six.vercel.app/)
 
 ## 🚀 Features
 
